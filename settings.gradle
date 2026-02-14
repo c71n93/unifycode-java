@@ -1,0 +1,2 @@
+rootProject.name = 'unifycode-java'
+include('unifycode-java-core', 'unifycode-java-gradle')

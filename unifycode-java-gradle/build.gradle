@@ -1,0 +1,20 @@
+plugins {
+    id 'java-gradle-plugin'
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation project(':unifycode-java-core')
+}
+
+gradlePlugin {
+    plugins {
+        unifycodeJava {
+            id = 'io.unifycode.java'
+            implementationClass = 'io.unifycode.java.UnifycodeJavaPlugin'
+        }
+    }
+}
