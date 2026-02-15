@@ -8,4 +8,12 @@ subprojects {
     repositories {
         mavenCentral()
     }
+
+    plugins.withId('java-base') {
+        java {
+            toolchain {
+                languageVersion = JavaLanguageVersion.of(21)
+            }
+        }
+    }
 }

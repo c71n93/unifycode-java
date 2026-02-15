@@ -2,6 +2,7 @@ plugins {
     id 'java-gradle-plugin'
 }
 
+// TODO: Isn't there an easier way to use functionalTest? Doesn't gradle support this task already?
 def functionalTest = sourceSets.create('functionalTest')
 
 configurations[functionalTest.implementationConfigurationName].extendsFrom(configurations.testImplementation)
