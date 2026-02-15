@@ -1,5 +1,6 @@
 package io.unifycode.java;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
@@ -47,6 +48,32 @@ class UnifycodeJavaPluginFunctionalTest {
         assertTrue(
                 result.getOutput().contains(":spotlessApply SKIPPED"),
                 () -> "Expected format task to depend on spotlessApply.\nOutput:\n" + result.getOutput()
+        );
+    }
+
+    @Test
+    void unifycodeCheckDependsOnStaticAnalysisTasksOnly() throws IOException {
+        writeConsumerProject();
+        final BuildResult result = GradleRunner.create()
+                .withProjectDir(testProjectDir.toFile())
+                .withArguments("unifycodeCheck", "--dry-run")
+                .withPluginClasspath()
+                .build();
+        assertTrue(
+                result.getOutput().contains(":spotlessCheck SKIPPED"),
+                () -> "Expected unifycodeCheck to include spotlessCheck.\nOutput:\n" + result.getOutput()
+        );
+        assertTrue(
+                result.getOutput().contains(":pmdMain SKIPPED"),
+                () -> "Expected unifycodeCheck to include pmdMain.\nOutput:\n" + result.getOutput()
+        );
+        assertTrue(
+                result.getOutput().contains(":checkstyleMain SKIPPED"),
+                () -> "Expected unifycodeCheck to include checkstyleMain.\nOutput:\n" + result.getOutput()
+        );
+        assertFalse(
+                result.getOutput().contains(":test SKIPPED"),
+                () -> "Expected unifycodeCheck not to include test task.\nOutput:\n" + result.getOutput()
         );
     }
 

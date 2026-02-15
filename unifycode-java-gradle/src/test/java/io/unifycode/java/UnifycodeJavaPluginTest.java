@@ -1,6 +1,7 @@
 package io.unifycode.java;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.nio.file.Files;
@@ -44,6 +45,22 @@ class UnifycodeJavaPluginTest {
 
         assertNotNull(project.getTasks().findByName("check"));
         assertNotNull(project.getTasks().findByName("spotlessCheck"));
+        assertNotNull(project.getTasks().findByName("unifycodeCheck"));
+    }
+
+    @Test
+    void unifycodeCheckDependsOnStaticAnalysisTasksOnly() {
+        final Task unifycodeCheckTask = project.getTasks().getByName("unifycodeCheck");
+        final Set<String> dependencies = unifycodeCheckTask.getTaskDependencies()
+                .getDependencies(unifycodeCheckTask)
+                .stream()
+                .map(Task::getName)
+                .collect(Collectors.toSet());
+
+        assertTrue(dependencies.contains("spotlessCheck"));
+        assertTrue(dependencies.contains("pmdMain"));
+        assertTrue(dependencies.contains("checkstyleMain"));
+        assertFalse(dependencies.contains("test"));
     }
 
     @Test

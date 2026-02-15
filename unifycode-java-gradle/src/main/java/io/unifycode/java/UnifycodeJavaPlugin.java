@@ -11,7 +11,9 @@ import java.util.Collections;
 import org.gradle.api.GradleException;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
+import org.gradle.api.plugins.quality.Checkstyle;
 import org.gradle.api.plugins.quality.CheckstyleExtension;
+import org.gradle.api.plugins.quality.Pmd;
 import org.gradle.api.plugins.quality.PmdExtension;
 
 public class UnifycodeJavaPlugin implements Plugin<Project> {
@@ -61,7 +63,15 @@ public class UnifycodeJavaPlugin implements Plugin<Project> {
             });
         }
 
-        // TODO: create task that will do only static analysis checks without launching tests.
+        if (project.getTasks().findByName("unifycodeCheck") == null) {
+            project.getTasks().register("unifycodeCheck", task -> {
+                task.setGroup("verification");
+                task.setDescription("Runs static analysis checks without launching tests.");
+                task.dependsOn("spotlessCheck");
+                task.dependsOn(project.getTasks().withType(Checkstyle.class));
+                task.dependsOn(project.getTasks().withType(Pmd.class));
+            });
+        }
     }
 
     private static File copyResourceToBuildDir(
