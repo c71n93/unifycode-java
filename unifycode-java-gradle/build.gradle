@@ -2,19 +2,54 @@ plugins {
     id 'java-gradle-plugin'
 }
 
+def functionalTest = sourceSets.create('functionalTest')
+
+configurations[functionalTest.implementationConfigurationName].extendsFrom(configurations.testImplementation)
+configurations[functionalTest.runtimeOnlyConfigurationName].extendsFrom(configurations.testRuntimeOnly)
+
 repositories {
     mavenCentral()
 }
 
 dependencies {
     implementation project(':unifycode-java-core')
+    implementation 'com.diffplug.spotless:spotless-plugin-gradle:6.25.0'
+
+    testImplementation gradleTestKit()
+    testImplementation platform('org.junit:junit-bom:5.10.2')
+    testImplementation 'org.junit.jupiter:junit-jupiter'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+
+    functionalTestImplementation gradleTestKit()
+    functionalTestImplementation platform('org.junit:junit-bom:5.10.2')
+    functionalTestImplementation 'org.junit.jupiter:junit-jupiter'
+    functionalTestRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
 
 gradlePlugin {
+    testSourceSets(functionalTest)
+
     plugins {
         unifycodeJava {
             id = 'io.unifycode.java'
             implementationClass = 'io.unifycode.java.UnifycodeJavaPlugin'
         }
     }
+}
+
+tasks.named('test') {
+    useJUnitPlatform()
+}
+
+tasks.register('functionalTest', Test) {
+    description = 'Runs functional tests.'
+    group = 'verification'
+    testClassesDirs = functionalTest.output.classesDirs
+    classpath = functionalTest.runtimeClasspath
+    shouldRunAfter(tasks.named('test'))
+    useJUnitPlatform()
+}
+
+tasks.named('check') {
+    dependsOn(tasks.named('functionalTest'))
 }
