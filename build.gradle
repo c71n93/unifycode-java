@@ -1,3 +1,10 @@
+// TODO: Figure out how to automatically set version to a commit, which is one before last.
+plugins {
+    id 'io.unifycode.java' version '7ce7d5bc0532f41654e6b4af3cc65a9ddd7b1e31' apply false
+}
+
+def useRemoteUnifycodePlugin = System.getenv('JITPACK') == null
+
 group = 'c71n93'
 version = '0.1.0-SNAPSHOT'
 
@@ -5,8 +12,8 @@ subprojects {
     group = rootProject.group
     version = rootProject.version
 
-    repositories {
-        mavenCentral()
+    if (useRemoteUnifycodePlugin) {
+        pluginManager.apply('io.unifycode.java')
     }
 
     plugins.withId('java-base') {

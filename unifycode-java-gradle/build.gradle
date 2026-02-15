@@ -8,10 +8,6 @@ def functionalTest = sourceSets.create('functionalTest')
 configurations[functionalTest.implementationConfigurationName].extendsFrom(configurations.testImplementation)
 configurations[functionalTest.runtimeOnlyConfigurationName].extendsFrom(configurations.testRuntimeOnly)
 
-repositories {
-    mavenCentral()
-}
-
 dependencies {
     implementation project(':unifycode-java-core')
     implementation 'com.diffplug.spotless:spotless-plugin-gradle:6.25.0'

@@ -44,7 +44,8 @@ public class UnifycodeJavaPlugin implements Plugin<Project> {
                 "eclipse-java-formatter.xml"
         );
 
-        project.getExtensions().configure(CheckstyleExtension.class, extension -> extension.setConfigFile(checkstyleConfig));
+        project.getExtensions()
+                .configure(CheckstyleExtension.class, extension -> extension.setConfigFile(checkstyleConfig));
         project.getExtensions().configure(PmdExtension.class, extension -> {
             extension.setToolVersion("7.0.0");
             extension.setConsoleOutput(true);
@@ -77,8 +78,7 @@ public class UnifycodeJavaPlugin implements Plugin<Project> {
     private static File copyResourceToBuildDir(
             final Project project,
             final String resourcePath,
-            final String targetFilename
-    ) {
+            final String targetFilename) {
         final File targetDir = new File(
                 project.getLayout().getBuildDirectory().getAsFile().get(),
                 "unifycode"
@@ -88,7 +88,8 @@ public class UnifycodeJavaPlugin implements Plugin<Project> {
         }
 
         final File targetFile = new File(targetDir, targetFilename);
-        try (InputStream inputStream = UnifycodeJavaPlugin.class.getClassLoader().getResourceAsStream(resourcePath)) {
+        final ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+        try (InputStream inputStream = classLoader.getResourceAsStream(resourcePath)) {
             if (inputStream == null) {
                 throw new GradleException("Could not load resource: " + resourcePath);
             }
