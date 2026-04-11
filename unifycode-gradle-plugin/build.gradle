@@ -9,7 +9,7 @@ configurations[functionalTest.implementationConfigurationName].extendsFrom(confi
 configurations[functionalTest.runtimeOnlyConfigurationName].extendsFrom(configurations.testRuntimeOnly)
 
 dependencies {
-    implementation project(':unifycode-java-core')
+    implementation project(':unifycode-core')
     implementation 'com.diffplug.spotless:spotless-plugin-gradle:6.25.0'
 
     testImplementation gradleTestKit()
@@ -28,8 +28,8 @@ gradlePlugin {
 
     plugins {
         unifycodeJava {
-            id = 'io.unifycode.java'
-            implementationClass = 'io.unifycode.java.UnifycodeJavaPlugin'
+            id = 'org.unifycode'
+            implementationClass = 'org.unifycode.gradle.UnifycodeGradlePlugin'
         }
     }
 }

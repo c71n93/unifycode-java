@@ -1,4 +1,4 @@
-package io.unifycode.java;
+package org.unifycode.gradle;
 
 import com.diffplug.gradle.spotless.SpotlessExtension;
 import java.io.File;
@@ -16,7 +16,7 @@ import org.gradle.api.plugins.quality.CheckstyleExtension;
 import org.gradle.api.plugins.quality.Pmd;
 import org.gradle.api.plugins.quality.PmdExtension;
 
-public class UnifycodeJavaPlugin implements Plugin<Project> {
+public class UnifycodeGradlePlugin implements Plugin<Project> {
     private static final String CHECKSTYLE_CONFIG_RESOURCE = "unifycode/checkstyle/checkstyle.xml";
     private static final String PMD_CONFIG_RESOURCE = "unifycode/pmd/pmd.xml";
     private static final String SPOTLESS_FORMATTER_RESOURCE = "unifycode/spotless/eclipse-java-formatter.xml";

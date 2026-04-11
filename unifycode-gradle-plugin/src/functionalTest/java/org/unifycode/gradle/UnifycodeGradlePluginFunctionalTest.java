@@ -1,4 +1,4 @@
-package io.unifycode.java;
+package org.unifycode.gradle;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -9,7 +9,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
-class UnifycodeJavaPluginFunctionalTest {
+class UnifycodeGradlePluginFunctionalTest {
     @TempDir
     Path testProjectDir;
 
@@ -81,7 +81,7 @@ class UnifycodeJavaPluginFunctionalTest {
                 "build.gradle",
                 "plugins {\n"
                         + "    id 'java'\n"
-                        + "    id 'io.unifycode.java'\n"
+                        + "    id 'org.unifycode'\n"
                         + "}\n"
                         + "\n"
                         + "repositories {\n"

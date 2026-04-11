@@ -1,4 +1,4 @@
-// TODO: Figure out how to automatically set version to a commit, which is one before last.
+// TODO: This solution of using a commit which is one before last is temporal. Further some release system will be used.
 plugins {
     id 'io.unifycode.java' version '7ce7d5bc0532f41654e6b4af3cc65a9ddd7b1e31' apply false
 }

@@ -1,4 +1,4 @@
-package io.unifycode.java;
+package org.unifycode.gradle;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -13,14 +13,14 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class UnifycodeJavaPluginTest {
+class UnifycodeGradlePluginTest {
     private Project project;
 
     @BeforeAll
     void setUpProject() {
         this.project = ProjectBuilder.builder().build();
         this.project.getPluginManager().apply("java");
-        new UnifycodeJavaPlugin().apply(this.project);
+        new UnifycodeGradlePlugin().apply(this.project);
     }
 
     @Test
