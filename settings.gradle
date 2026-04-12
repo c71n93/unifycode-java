@@ -6,15 +6,19 @@ pluginManagement {
     }
     resolutionStrategy {
         eachPlugin {
-            if (requested.id.id == 'org.unifycode' || requested.id.id == 'io.unifycode.java') {
-                useModule("com.github.c71n93.unifycode-java:unifycode-java-gradle:${requested.version}")
+            if (requested.id.id == 'org.unifycode') {
+                useModule("com.github.c71n93.unifycode-java:unifycode-gradle-plugin:${requested.version}")
             }
         }
     }
 }
 
 rootProject.name = 'unifycode-java'
-include('unifycode-core', 'unifycode-gradle-plugin')
+include('unifycode-checkstyle', 'unifycode-pmd', 'unifycode-spotless', 'unifycode-gradle-plugin')
+
+project(':unifycode-checkstyle').projectDir = file('unifycode-core/checkstyle')
+project(':unifycode-pmd').projectDir = file('unifycode-core/pmd')
+project(':unifycode-spotless').projectDir = file('unifycode-core/spotless')
 
 dependencyResolutionManagement {
     repositories {

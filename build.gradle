@@ -1,6 +1,6 @@
 // TODO: This solution of using a commit which is one before last is temporal. Further some release system will be used.
 plugins {
-    id 'io.unifycode.java' version '7ce7d5bc0532f41654e6b4af3cc65a9ddd7b1e31' apply false
+    id 'org.unifycode' version '57c4d9fb59' apply false
 }
 
 def useRemoteUnifycodePlugin = System.getenv('JITPACK') == null
@@ -13,7 +13,7 @@ subprojects {
     version = rootProject.version
 
     if (useRemoteUnifycodePlugin) {
-        pluginManager.apply('io.unifycode.java')
+        pluginManager.apply('org.unifycode')
     }
 
     plugins.withId('java-base') {
