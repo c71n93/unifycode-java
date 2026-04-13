@@ -3,6 +3,7 @@ build/
 
 ### IntelliJ IDEA ###
 .idea
+.vscode
 
 ### Mac OS ###
 .DS_Store

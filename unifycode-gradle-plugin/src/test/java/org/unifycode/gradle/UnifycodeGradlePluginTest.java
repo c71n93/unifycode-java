@@ -6,87 +6,143 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import org.gradle.api.Project;
 import org.gradle.api.Task;
+import org.gradle.api.internal.project.ProjectInternal;
 import org.gradle.testfixtures.ProjectBuilder;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInstance;
 
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class UnifycodeGradlePluginTest {
-    private Project project;
+    private static final String FORMAT = "format";
+    private static final String UNIFYCODE_CHECK = "unifycodeCheck";
 
-    @BeforeAll
-    void setUpProject() {
-        this.project = ProjectBuilder.builder().build();
-        this.project.getPluginManager().apply("java");
-        new UnifycodeGradlePlugin().apply(this.project);
+    @Test
+    void applyCreatesExtensionWithEnabledDefaults() {
+        final Project project = ProjectBuilder.builder().build();
+        new UnifycodeGradlePlugin().apply(project);
+        final UnifycodeExtension extension = project.getExtensions().getByType(UnifycodeExtension.class);
+        Assertions.assertTrue(extension.getCheckstyleEnabled().get(), "Expected Checkstyle to be enabled by default.");
+        Assertions.assertTrue(extension.getPmdEnabled().get(), "Expected PMD to be enabled by default.");
+        Assertions.assertTrue(extension.getSpotlessEnabled().get(), "Expected Spotless to be enabled by default.");
     }
 
     @Test
-    void applyRegistersDependentPlugins() {
+    void applyRegistersHelperTasksForNonJavaProject() {
+        final Project project = ProjectBuilder.builder().build();
+        new UnifycodeGradlePlugin().apply(project);
+        Assertions
+                .assertNotNull(this.task(project, UnifycodeGradlePluginTest.FORMAT), "Expected format task to exist.");
         Assertions.assertNotNull(
-                this.project.getPlugins().findPlugin("checkstyle"), "Expected checkstyle plugin to be applied."
+                this.task(project, UnifycodeGradlePluginTest.UNIFYCODE_CHECK),
+                "Expected unifycodeCheck task to exist."
         );
-        Assertions.assertNotNull(this.project.getPlugins().findPlugin("pmd"), "Expected pmd plugin to be applied.");
-        Assertions.assertNotNull(
-                this.project.getPlugins().findPlugin("com.diffplug.spotless"),
-                "Expected spotless plugin to be applied."
+        Assertions.assertNull(
+                project.getPlugins().findPlugin("checkstyle"),
+                "Expected Checkstyle plugin not to be applied."
+        );
+        Assertions.assertNull(project.getPlugins().findPlugin("pmd"), "Expected PMD plugin not to be applied.");
+        Assertions.assertNull(
+                project.getPlugins().findPlugin("com.diffplug.spotless"),
+                "Expected Spotless plugin not to be applied."
         );
     }
 
     @Test
-    void applyRegistersExpectedTasks() {
-        final Task formatTask = this.project.getTasks().getByName("format");
-        final Set<String> formatDependencies = formatTask.getTaskDependencies()
-                .getDependencies(formatTask)
-                .stream()
-                .map(Task::getName)
-                .collect(Collectors.toSet());
+    void applyBeforeJavaConfiguresToolsAfterEvaluation() {
+        final Project project = ProjectBuilder.builder().build();
+        new UnifycodeGradlePlugin().apply(project);
+        project.getPluginManager().apply("java");
+        this.evaluate(project);
+        Assertions.assertNotNull(
+                project.getPlugins().findPlugin("checkstyle"),
+                "Expected Checkstyle plugin to be applied."
+        );
+        Assertions.assertNotNull(project.getPlugins().findPlugin("pmd"), "Expected PMD plugin to be applied.");
+        Assertions.assertNotNull(
+                project.getPlugins().findPlugin("com.diffplug.spotless"),
+                "Expected Spotless plugin to be applied."
+        );
         Assertions.assertTrue(
-                formatDependencies.contains("spotlessApply"),
+                this.dependencies(this.task(project, UnifycodeGradlePluginTest.FORMAT)).contains("spotlessApply"),
                 "Expected format task to depend on spotlessApply."
         );
-
-        Assertions.assertNotNull(this.project.getTasks().findByName("check"), "Expected check task to exist.");
-        Assertions.assertNotNull(
-                this.project.getTasks().findByName("spotlessCheck"), "Expected spotlessCheck task to exist."
+        Assertions.assertTrue(
+                this.dependencies(this.task(project, UnifycodeGradlePluginTest.UNIFYCODE_CHECK))
+                        .contains("spotlessCheck"),
+                "Expected unifycodeCheck to depend on spotlessCheck."
         );
-        Assertions.assertNotNull(
-                this.project.getTasks().findByName("unifycodeCheck"), "Expected unifycodeCheck task to exist."
+        Assertions.assertTrue(
+                this.dependencies(this.task(project, UnifycodeGradlePluginTest.UNIFYCODE_CHECK)).contains("pmdMain"),
+                "Expected unifycodeCheck to depend on pmdMain."
+        );
+        Assertions.assertTrue(
+                this.dependencies(this.task(project, UnifycodeGradlePluginTest.UNIFYCODE_CHECK))
+                        .contains("checkstyleMain"),
+                "Expected unifycodeCheck to depend on checkstyleMain."
         );
     }
 
     @Test
-    void unifycodeCheckDependsOnStaticAnalysisTasksOnly() {
-        final Task unifycodeCheckTask = this.project.getTasks().getByName("unifycodeCheck");
-        final Set<String> dependencies = unifycodeCheckTask.getTaskDependencies()
-                .getDependencies(unifycodeCheckTask)
+    void applyCopiesExpectedConfigFilesForJavaProject() {
+        final Project project = ProjectBuilder.builder().build();
+        project.getPluginManager().apply("java");
+        new UnifycodeGradlePlugin().apply(project);
+        this.evaluate(project);
+        final Path unifycode = project.getLayout().getBuildDirectory().getAsFile().get().toPath().resolve("unifycode");
+        Assertions.assertTrue(
+                Files.exists(unifycode.resolve("checkstyle.xml")),
+                "Expected checkstyle.xml to be copied."
+        );
+        Assertions.assertTrue(Files.exists(unifycode.resolve("pmd.xml")), "Expected pmd.xml to be copied.");
+        Assertions.assertTrue(
+                Files.exists(unifycode.resolve("eclipse-java-formatter.xml")),
+                "Expected eclipse-java-formatter.xml to be copied."
+        );
+    }
+
+    @Test
+    void disabledToolsLeaveHelperTasksAsNoOp() {
+        final Project project = ProjectBuilder.builder().build();
+        new UnifycodeGradlePlugin().apply(project);
+        final UnifycodeExtension extension = project.getExtensions().getByType(UnifycodeExtension.class);
+        extension.getCheckstyleEnabled().set(false);
+        extension.getPmdEnabled().set(false);
+        extension.getSpotlessEnabled().set(false);
+        project.getPluginManager().apply("java");
+        this.evaluate(project);
+        Assertions.assertNull(
+                project.getPlugins().findPlugin("checkstyle"),
+                "Expected Checkstyle plugin not to be applied."
+        );
+        Assertions.assertNull(project.getPlugins().findPlugin("pmd"), "Expected PMD plugin not to be applied.");
+        Assertions.assertNull(
+                project.getPlugins().findPlugin("com.diffplug.spotless"),
+                "Expected Spotless plugin not to be applied."
+        );
+        Assertions.assertTrue(
+                this.dependencies(this.task(project, UnifycodeGradlePluginTest.FORMAT)).isEmpty(),
+                "Expected format task to have no dependencies."
+        );
+        Assertions.assertTrue(
+                this.dependencies(this.task(project, UnifycodeGradlePluginTest.UNIFYCODE_CHECK)).isEmpty(),
+                "Expected unifycodeCheck task to have no dependencies."
+        );
+        final Path unifycode = project.getLayout().getBuildDirectory().getAsFile().get().toPath().resolve("unifycode");
+        Assertions.assertFalse(Files.exists(unifycode), "Expected no unifycode config files to be copied.");
+    }
+
+    private Task task(final Project project, final String name) {
+        return project.getTasks().getByName(name);
+    }
+
+    private Set<String> dependencies(final Task task) {
+        return task.getTaskDependencies()
+                .getDependencies(task)
                 .stream()
                 .map(Task::getName)
                 .collect(Collectors.toSet());
-
-        Assertions.assertTrue(
-                dependencies.contains("spotlessCheck"), "Expected unifycodeCheck to depend on spotlessCheck."
-        );
-        Assertions.assertTrue(dependencies.contains("pmdMain"), "Expected unifycodeCheck to depend on pmdMain.");
-        Assertions.assertTrue(
-                dependencies.contains("checkstyleMain"), "Expected unifycodeCheck to depend on checkstyleMain."
-        );
-        Assertions.assertFalse(dependencies.contains("test"), "Expected unifycodeCheck not to depend on test.");
     }
 
-    @Test
-    void applyCopiesExpectedConfigFiles() {
-        final Path unifycodeDir = this.project.getLayout().getBuildDirectory().getAsFile().get().toPath()
-                .resolve("unifycode");
-        Assertions.assertTrue(
-                Files.exists(unifycodeDir.resolve("checkstyle.xml")), "Expected checkstyle.xml to be copied."
-        );
-        Assertions.assertTrue(Files.exists(unifycodeDir.resolve("pmd.xml")), "Expected pmd.xml to be copied.");
-        Assertions.assertTrue(
-                Files.exists(unifycodeDir.resolve("eclipse-java-formatter.xml")),
-                "Expected eclipse-java-formatter.xml to be copied."
-        );
+    private void evaluate(final Project project) {
+        ((ProjectInternal) project).evaluate();
     }
 }
