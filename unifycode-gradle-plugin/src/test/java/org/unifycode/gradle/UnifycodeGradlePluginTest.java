@@ -4,6 +4,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Set;
 import java.util.stream.Collectors;
+import org.gradle.api.InvalidUserDataException;
 import org.gradle.api.Project;
 import org.gradle.api.Task;
 import org.gradle.api.internal.project.ProjectInternal;
@@ -12,7 +13,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 class UnifycodeGradlePluginTest {
-    private static final String FORMAT = "format";
+    private static final String FORMAT = "unifycodeFormat";
     private static final String UNIFYCODE_CHECK = "unifycodeCheck";
 
     @Test
@@ -30,7 +31,10 @@ class UnifycodeGradlePluginTest {
         final Project project = ProjectBuilder.builder().build();
         new UnifycodeGradlePlugin().apply(project);
         Assertions
-                .assertNotNull(this.task(project, UnifycodeGradlePluginTest.FORMAT), "Expected format task to exist.");
+                .assertNotNull(
+                        this.task(project, UnifycodeGradlePluginTest.FORMAT),
+                        "Expected unifycodeFormat task to exist."
+                );
         Assertions.assertNotNull(
                 this.task(project, UnifycodeGradlePluginTest.UNIFYCODE_CHECK),
                 "Expected unifycodeCheck task to exist."
@@ -43,6 +47,20 @@ class UnifycodeGradlePluginTest {
         Assertions.assertNull(
                 project.getPlugins().findPlugin("com.diffplug.spotless"),
                 "Expected Spotless plugin not to be applied."
+        );
+    }
+
+    @Test
+    void applyFailsWhenProjectAlreadyDefinesHelperTask() {
+        final Project project = ProjectBuilder.builder().build();
+        project.getTasks().register(UnifycodeGradlePluginTest.FORMAT);
+        final InvalidUserDataException exception = Assertions.assertThrows(
+                InvalidUserDataException.class,
+                () -> new UnifycodeGradlePlugin().apply(project)
+        );
+        Assertions.assertTrue(
+                exception.getMessage().contains(UnifycodeGradlePluginTest.FORMAT),
+                "Expected duplicate task error to mention unifycodeFormat."
         );
     }
 
@@ -63,7 +81,7 @@ class UnifycodeGradlePluginTest {
         );
         Assertions.assertTrue(
                 this.dependencies(this.task(project, UnifycodeGradlePluginTest.FORMAT)).contains("spotlessApply"),
-                "Expected format task to depend on spotlessApply."
+                "Expected unifycodeFormat task to depend on spotlessApply."
         );
         Assertions.assertTrue(
                 this.dependencies(this.task(project, UnifycodeGradlePluginTest.UNIFYCODE_CHECK))
@@ -120,7 +138,7 @@ class UnifycodeGradlePluginTest {
         );
         Assertions.assertTrue(
                 this.dependencies(this.task(project, UnifycodeGradlePluginTest.FORMAT)).isEmpty(),
-                "Expected format task to have no dependencies."
+                "Expected unifycodeFormat task to have no dependencies."
         );
         Assertions.assertTrue(
                 this.dependencies(this.task(project, UnifycodeGradlePluginTest.UNIFYCODE_CHECK)).isEmpty(),

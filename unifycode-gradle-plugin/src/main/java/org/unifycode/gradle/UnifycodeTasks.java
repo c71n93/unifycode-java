@@ -2,7 +2,6 @@ package org.unifycode.gradle;
 
 import java.util.Collections;
 import java.util.concurrent.Callable;
-import org.gradle.api.Action;
 import org.gradle.api.Project;
 import org.gradle.api.Task;
 import org.gradle.api.plugins.quality.Checkstyle;
@@ -18,53 +17,37 @@ final class UnifycodeTasks {
     }
 
     void configure() {
-        // TODO: refactor this AI slop later.
-        this.configureTask("format", task -> {
+        this.project.getTasks().register("unifycodeFormat", task -> {
             task.setGroup("formatting");
             task.setDescription("Runs source formatting via Spotless.");
-            task.dependsOn((Callable<Object>) this::spotlessApplyTask);
+            task.dependsOn((Callable<Iterable<? extends Task>>) this::spotlessApplyTasks);
         });
-        this.configureTask("unifycodeCheck", task -> {
+        this.project.getTasks().register("unifycodeCheck", task -> {
             task.setGroup("verification");
             task.setDescription("Runs static analysis checks without launching tests.");
-            task.dependsOn((Callable<Object>) this::spotlessCheckTask);
-            task.dependsOn((Callable<Object>) this::checkstyleTasks);
-            task.dependsOn((Callable<Object>) this::pmdTasks);
+            task.dependsOn((Callable<Iterable<? extends Task>>) this::spotlessCheckTasks);
+            task.dependsOn(this.checkstyleTasks());
+            task.dependsOn(this.pmdTasks());
         });
     }
 
-    private void configureTask(final String name, final Action<Task> action) {
-        final Task task = this.project.getTasks().findByName(name);
-        if (task == null) {
-            this.project.getTasks().register(name, action);
-            return;
-        }
-        action.execute(task);
-    }
-
-    private Object spotlessApplyTask() {
+    private Iterable<? extends Task> spotlessApplyTasks() {
         return this.taskNamedWhenEnabled("spotlessApply", this.extension.getSpotlessEnabled().get());
     }
 
-    private Object spotlessCheckTask() {
+    private Iterable<? extends Task> spotlessCheckTasks() {
         return this.taskNamedWhenEnabled("spotlessCheck", this.extension.getSpotlessEnabled().get());
     }
 
-    private Object checkstyleTasks() {
-        if (!this.extension.getCheckstyleEnabled().get()) {
-            return Collections.emptyList();
-        }
-        return this.project.getTasks().withType(Checkstyle.class);
+    private Iterable<? extends Task> checkstyleTasks() {
+        return this.tasksTypedWhenEnabled(Checkstyle.class, this.extension.getCheckstyleEnabled().get());
     }
 
-    private Object pmdTasks() {
-        if (!this.extension.getPmdEnabled().get()) {
-            return Collections.emptyList();
-        }
-        return this.project.getTasks().withType(Pmd.class);
+    private Iterable<? extends Task> pmdTasks() {
+        return this.tasksTypedWhenEnabled(Pmd.class, this.extension.getPmdEnabled().get());
     }
 
-    private Object taskNamedWhenEnabled(final String name, final boolean enabled) {
+    private Iterable<? extends Task> taskNamedWhenEnabled(final String name, final boolean enabled) {
         if (!enabled) {
             return Collections.emptyList();
         }
@@ -73,5 +56,12 @@ final class UnifycodeTasks {
             return Collections.emptyList();
         }
         return Collections.singletonList(task);
+    }
+
+    private <T extends Task> Iterable<T> tasksTypedWhenEnabled(final Class<T> type, final boolean enabled) {
+        if (!enabled) {
+            return Collections.emptyList();
+        }
+        return this.project.getTasks().withType(type);
     }
 }

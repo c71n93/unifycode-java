@@ -14,7 +14,7 @@ class UnifycodeGradlePluginFunctionalTest {
     private static final String UNIFYCODE_AND_JAVA = "    id 'org.unifycode'\n    id 'java'\n";
     private static final String UNIFYCODE_ONLY = "    id 'org.unifycode'\n";
     private static final String DRY_RUN = "--dry-run";
-    private static final String FORMAT = "format";
+    private static final String FORMAT = "unifycodeFormat";
     private static final String UNIFYCODE_CHECK = "unifycodeCheck";
     private static final String SPOTLESS_APPLY = ":spotlessApply SKIPPED";
     private static final String SPOTLESS_CHECK = ":spotlessCheck SKIPPED";
@@ -53,7 +53,7 @@ class UnifycodeGradlePluginFunctionalTest {
         this.assertContains(
                 result,
                 UnifycodeGradlePluginFunctionalTest.SPOTLESS_APPLY,
-                "Expected format task to depend on spotlessApply."
+                "Expected unifycodeFormat task to depend on spotlessApply."
         );
     }
 
@@ -180,7 +180,11 @@ class UnifycodeGradlePluginFunctionalTest {
                 UnifycodeGradlePluginFunctionalTest.UNIFYCODE_CHECK,
                 UnifycodeGradlePluginFunctionalTest.DRY_RUN
         );
-        this.assertContains(format, ":format SKIPPED", "Expected format task to remain available.");
+        this.assertContains(
+                format,
+                ":unifycodeFormat SKIPPED",
+                "Expected unifycodeFormat task to remain available."
+        );
         this.assertContains(check, ":unifycodeCheck SKIPPED", "Expected unifycodeCheck task to remain available.");
         this.assertNotContains(
                 format,
@@ -229,7 +233,7 @@ class UnifycodeGradlePluginFunctionalTest {
                 UnifycodeGradlePluginFunctionalTest.UNIFYCODE_CHECK,
                 UnifycodeGradlePluginFunctionalTest.DRY_RUN
         );
-        this.assertContains(format, ":format SKIPPED", "Expected format task to exist.");
+        this.assertContains(format, ":unifycodeFormat SKIPPED", "Expected unifycodeFormat task to exist.");
         this.assertContains(check, ":unifycodeCheck SKIPPED", "Expected unifycodeCheck task to exist.");
         this.assertNotContains(
                 format,
