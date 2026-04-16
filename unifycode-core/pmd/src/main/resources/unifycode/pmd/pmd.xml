@@ -1,22 +1,233 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<ruleset name="Hat PMD Rules"
-    xmlns="http://pmd.sourceforge.net/ruleset/2.0.0"
+<ruleset name="Unifycode Java Ruleset" xmlns="http://pmd.sourceforge.net/ruleset/2.0.0"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="http://pmd.sourceforge.net/ruleset/2.0.0 https://pmd.github.io/pmd-7.0.0/pmd-7.0.0.xsd">
-    <description>Project PMD rules.</description>
+
+    <description>Base PMD rules.</description>
+
     <rule ref="category/java/bestpractices.xml">
-        <exclude name="JUnitTestContainsTooManyAsserts"/>
+        <exclude name="GuardLogStatement" />
+        <exclude name="JUnitTestContainsTooManyAsserts" />
     </rule>
-    <rule ref="category/java/errorprone.xml">
-        <exclude name="AvoidFieldNameMatchingMethodName"/>
-        <exclude name="AvoidLiteralsInIfCondition"/>
+
+    <rule ref="category/java/codestyle.xml">
+        <exclude name="ShortClassName" />
+        <exclude name="ShortVariable" />
+        <exclude name="UnnecessaryFullyQualifiedName" />
+        <exclude name="AtLeastOneConstructor" />
+        <exclude name="LongVariable" /> <!-- TODO: not sure about this rule -->
+        <exclude name="OnlyOneReturn" /> <!-- TODO: not sure about this rule. Maybe try to use checkstyle ReturnCount check -->
+        <exclude name="CommentDefaultAccessModifier" /> <!-- TODO: not sure about this rule -->
     </rule>
-    <rule ref="category/java/errorprone.xml/AvoidLiteralsInIfCondition">
+
+    <rule ref="category/java/design.xml">
+        <exclude name="LawOfDemeter" /> <!-- TODO: not sure about this rule -->
+        <exclude name="TooManyMethods" />
+        <exclude name="LoosePackageCoupling" />
+    </rule>
+    <rule ref="category/java/design.xml/TooManyMethods">
         <properties>
-            <property name="ignoreMagicNumbers" value="0,1,-1,0.0d"/>
+            <property name="violationSuppressXPath"
+                value="./ancestor-or-self::ClassDeclaration[ends-with(@SimpleName, 'Test')]" />
         </properties>
     </rule>
-<!--    TODO: turn this categories on eventually-->
-<!--    <rule ref="category/java/performance.xml"/>-->
-<!--    <rule ref="category/java/codestyle.xml"/>-->
+
+
+    <rule ref="category/java/documentation.xml">
+        <exclude name="CommentRequired" /> <!-- TODO: not sure about this rule -->
+        <exclude name="CommentSize" />
+    </rule>
+
+    <rule ref="category/java/errorprone.xml">
+        <exclude name="AvoidFieldNameMatchingMethodName" /> <!-- TODO: not sure about this rule -->
+        <exclude name="AvoidLiteralsInIfCondition" />
+    </rule>
+
+    <!-- TODO: turn this categories on eventually -->
+    <!-- <rule ref="category/java/performance.xml"/> -->
+    <!-- <rule ref="category/java/multithreading.xml"/> -->
+
+    <!-- Rules taken from Qulice https://github.com/yegor256/qulice -->
+    <rule name="ConstructorShouldDoInitialization" message="Avoid doing field initialization outside constructor."
+        language="java" class="net.sourceforge.pmd.lang.rule.xpath.XPathRule">
+        <description>
+            Avoid doing field initialization outside class
+            constructor.
+            Such initialization is allowed only when
+            there is no
+            constructor.
+        </description>
+        <priority>3</priority>
+        <properties>
+            <property name="xpath">
+                <value><![CDATA[
+            //ClassDeclaration
+            [count(ClassBody/ConstructorDeclaration)>0]
+            [count(ClassBody/FieldDeclaration[@Static=false()]/VariableDeclarator[@Initializer=true()])>0]
+            ]]></value>
+            </property>
+        </properties>
+    </rule>
+    <rule name="OnlyOneConstructorShouldDoInitialization"
+        message="Avoid field initialization in several constructors." language="java"
+        class="net.sourceforge.pmd.lang.rule.xpath.XPathRule">
+        <description>
+            Avoid doing field initialization in several constructors.
+            Only one main constructor should do real
+            work.
+            Other constructors
+            should delegate initialization to it.
+        </description>
+        <priority>3</priority>
+        <properties>
+            <property name="xpath">
+                <value><![CDATA[
+            //ClassDeclaration
+                [count(ClassBody/ConstructorDeclaration)>1]
+                [count(ClassBody/ConstructorDeclaration/Block[ExpressionStatement])>1]
+            ]]></value>
+            </property>
+        </properties>
+    </rule>
+    <rule name="ConstructorOnlyInitializesOrCallOtherConstructors"
+        message="Only field initialization or call to other constructors in a constructor." language="java"
+        class="net.sourceforge.pmd.lang.rule.xpath.XPathRule">
+        <description>
+            Avoid putting anything other than field assignments into
+            constructors.
+            The only exception should be
+            calling other constructors
+            or calling super class constructor.
+        </description>
+        <priority>3</priority>
+        <properties>
+            <property name="xpath">
+                <value><![CDATA[
+            //ConstructorDeclaration/Block[
+                count(ExpressionStatement[not(.//LambdaExpression)]) + count(LocalVariableDeclaration)
+                !=
+                count(ExpressionStatement/AssignmentExpression[not(.//LambdaExpression)]/FieldAccess/ThisExpression)
+            ]
+            ]]></value>
+            </property>
+        </properties>
+    </rule>
+    <rule name="AvoidDirectAccessToStaticFields"
+        message="Static fields should be accessed in a static way [CLASS_NAME.FIELD_NAME]." language="java"
+        class="net.sourceforge.pmd.lang.rule.xpath.XPathRule">
+        <description>
+            Avoid accessing static fields directly.
+        </description>
+        <priority>3</priority>
+        <properties>
+            <property name="xpath">
+                <value><![CDATA[
+            //VariableAccess[@Name = //FieldDeclaration[@Static=true()]/VariableDeclarator/VariableId/@Name]
+            ]]></value>
+            </property>
+        </properties>
+    </rule>
+    <rule name="AvoidAccessToStaticMembersViaThis"
+        message="Static members should be accessed in a static way [CLASS_NAME.FIELD_NAME], not via instance reference."
+        language="java" class="net.sourceforge.pmd.lang.rule.xpath.XPathRule">
+        <description>
+            Avoid accessing static fields or methods via instance
+            with 'this' keyword.
+        </description>
+        <priority>3</priority>
+        <properties>
+            <property name="xpath">
+                <value><![CDATA[
+            //FieldAccess[
+                ThisExpression
+                and
+                @Name =
+                ancestor::ClassDeclaration[1]
+                    //FieldDeclaration[@Static=true()]
+                    /VariableDeclarator
+                    /VariableId/@Name
+            ]
+            |
+            //MethodCall[
+                ThisExpression
+                and
+                @MethodName =
+                ancestor::ClassDeclaration[1]
+                    /ClassBody
+                    /MethodDeclaration[@Static=true()]
+                    /@Name
+            ]
+            ]]></value>
+            </property>
+        </properties>
+    </rule>
+    <rule name="ProhibitPublicStaticMethods" message="Public static methods are prohibited." language="java"
+        class="net.sourceforge.pmd.lang.rule.xpath.XPathRule">
+        <description>
+            Public static methods are prohibited.
+        </description>
+        <priority>3</priority>
+        <properties>
+            <property name="xpath">
+                <value><![CDATA[
+            //MethodDeclaration[
+                @Static=true() and
+                @Visibility='public' and not
+                (@Name='main' and FormalParameters/FormalParameter/ArrayType/ClassType/@SimpleName='String' and VoidType) and not
+                (ModifierList/Annotation[@SimpleName='BeforeClass' or @SimpleName='AfterClass' or @SimpleName='Parameters'])
+            ]
+        ]]></value>
+            </property>
+        </properties>
+    </rule>
+    <rule name="ProhibitFilesCreateFileInTests"
+        message="Files.createFile should not be used in tests, replace them with @Rule TemporaryFolder" language="java"
+        class="net.sourceforge.pmd.lang.rule.xpath.XPathRule">
+        <description>
+            Files.createFile shouldn't be used in tests.
+        </description>
+        <priority>3</priority>
+        <properties>
+            <property name="xpath">
+                <value><![CDATA[
+            //ClassDeclaration[ends-with(@SimpleName, 'Test')]//MethodCall[@MethodName='createFile' and TypeExpression/ClassType/@SimpleName='Files']
+            ]]></value>
+            </property>
+        </properties>
+    </rule>
+    <rule name="JUnitTestClassShouldBeFinal" language="java" class="net.sourceforge.pmd.lang.rule.xpath.XPathRule"
+        message="JUnit test class should be final">
+        <description><![CDATA[
+        Reports on JUnit test classes declared non-final.
+        ]]></description>
+        <priority>3</priority>
+        <properties>
+            <!--Solve priority conflict -->
+            <property name="xpath">
+                <value><![CDATA[
+	            //ClassDeclaration[
+	                @Interface = false()
+	                and
+	                @Final = false()
+	                and
+	                (
+	                    ends-with(@SimpleName, 'Test')
+	                    or
+	                    .//Annotation[
+	                        @SimpleName = 'Test'
+	                        or
+	                        @SimpleName = 'ParameterizedTest'
+	                        or
+	                        @SimpleName = 'RepeatedTest'
+	                        or
+	                        @SimpleName = 'TestFactory'
+	                        or
+	                        @SimpleName = 'TestTemplate'
+	                    ]
+	                )
+	            ]
+	            ]]></value>
+            </property>
+        </properties>
+    </rule>
 </ruleset>

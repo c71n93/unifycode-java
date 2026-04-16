@@ -1,5 +1,7 @@
-// TODO: This solution of using a commit which is one before last is temporal. Further some release system will be used.
 plugins {
+    id 'base'
+    id 'com.diffplug.spotless' version '6.25.0'
+    // TODO: This solution of using a commit which is one before last is temporal. Further some release system will be used.
     id 'org.unifycode' version '57c4d9fb59' apply false
 }
 
@@ -7,6 +9,15 @@ def useRemoteUnifycodePlugin = System.getenv('JITPACK') == null
 
 group = 'c71n93'
 version = '0.1.0-SNAPSHOT'
+
+spotless {
+    format('xml') {
+        target('**/*.xml')
+        eclipseWtp(com.diffplug.spotless.extra.wtp.EclipseWtpFormatterStep.XML).configFile(
+                'config/spotless/eclipse-xml-formatter.prefs'
+        )
+    }
+}
 
 subprojects {
     group = rootProject.group
