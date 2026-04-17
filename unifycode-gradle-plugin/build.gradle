@@ -12,17 +12,7 @@ dependencies {
     implementation project(':unifycode-checkstyle')
     implementation project(':unifycode-pmd')
     implementation project(':unifycode-spotless')
-    implementation 'com.diffplug.spotless:spotless-plugin-gradle:6.25.0'
-
-    testImplementation gradleTestKit()
-    testImplementation platform('org.junit:junit-bom:5.10.2')
-    testImplementation 'org.junit.jupiter:junit-jupiter'
-    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
-
-    functionalTestImplementation gradleTestKit()
-    functionalTestImplementation platform('org.junit:junit-bom:5.10.2')
-    functionalTestImplementation 'org.junit.jupiter:junit-jupiter'
-    functionalTestRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+    implementation 'com.diffplug.spotless:spotless-plugin-gradle:8.4.0'
 }
 
 gradlePlugin {
@@ -36,17 +26,12 @@ gradlePlugin {
     }
 }
 
-tasks.named('test') {
-    useJUnitPlatform()
-}
-
 tasks.register('functionalTest', Test) {
     description = 'Runs functional tests.'
     group = 'verification'
     testClassesDirs = functionalTest.output.classesDirs
     classpath = functionalTest.runtimeClasspath
     shouldRunAfter(tasks.named('test'))
-    useJUnitPlatform()
 }
 
 tasks.named('check') {

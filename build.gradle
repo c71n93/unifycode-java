@@ -1,11 +1,13 @@
 plugins {
     id 'base'
-    id 'com.diffplug.spotless' version '6.25.0'
+    id 'com.diffplug.spotless' version '8.4.0'
     // TODO: This solution of using a commit which is one before last is temporal. Further some release system will be used.
     id 'org.unifycode' version '57c4d9fb59' apply false
 }
 
 def useRemoteUnifycodePlugin = System.getenv('JITPACK') == null
+def junitVersion = '5.10.2'
+def gradleTestKitProjects = [':unifycode-spotless', ':unifycode-gradle-plugin'] as Set
 
 group = 'c71n93'
 version = '0.1.0-SNAPSHOT'
@@ -31,6 +33,20 @@ subprojects {
         java {
             toolchain {
                 languageVersion = JavaLanguageVersion.of(21)
+            }
+        }
+        tasks.withType(Test).configureEach {
+            useJUnitPlatform()
+        }
+    }
+
+    plugins.withId('java') {
+        dependencies {
+            testImplementation platform("org.junit:junit-bom:${junitVersion}")
+            testImplementation 'org.junit.jupiter:junit-jupiter'
+            testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+            if (project.path in gradleTestKitProjects) {
+                testImplementation gradleTestKit()
             }
         }
     }
