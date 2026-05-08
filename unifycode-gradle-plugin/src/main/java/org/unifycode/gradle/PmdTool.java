@@ -25,6 +25,8 @@ final class PmdTool {
         this.project.getPluginManager().apply("pmd");
         final File config = this.resources.copy(PmdTool.RESOURCE);
         this.project.getExtensions().configure(PmdExtension.class, extension -> {
+            // TODO: Make tools version setting from one place. 
+            // This setting should be used in source code and in tests.
             extension.setToolVersion("7.0.0");
             extension.setConsoleOutput(true);
             extension.setRuleSets(Collections.emptyList());
