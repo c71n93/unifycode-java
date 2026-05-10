@@ -21,6 +21,7 @@ public final class UnifycodeGradlePlugin implements Plugin<Project> {
             if (extension.getSpotlessEnabled().get()) {
                 new SpotlessTool(project).configure();
             }
+            project.getTasks().named("check").configure(task -> task.dependsOn("unifycodeCheck"));
         }));
     }
 }

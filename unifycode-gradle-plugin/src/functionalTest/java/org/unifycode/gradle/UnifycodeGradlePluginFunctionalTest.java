@@ -16,6 +16,7 @@ class UnifycodeGradlePluginFunctionalTest {
     private static final String DRY_RUN = "--dry-run";
     private static final String FORMAT = "unifycodeFormat";
     private static final String UNIFYCODE_CHECK = "unifycodeCheck";
+    private static final String UNIFYCODE_CHECK_SKIPPED = ":unifycodeCheck SKIPPED";
     private static final String SPOTLESS_APPLY = ":spotlessApply SKIPPED";
     private static final String SPOTLESS_CHECK = ":spotlessCheck SKIPPED";
     private static final String PMD_MAIN = ":pmdMain SKIPPED";
@@ -29,6 +30,11 @@ class UnifycodeGradlePluginFunctionalTest {
     void checkTaskDependsOnAllQualityChecks() throws IOException {
         this.writeConsumerProject(UnifycodeGradlePluginFunctionalTest.JAVA_AND_UNIFYCODE, "");
         final BuildResult result = this.run("check", UnifycodeGradlePluginFunctionalTest.DRY_RUN);
+        this.assertContains(
+                result,
+                UnifycodeGradlePluginFunctionalTest.UNIFYCODE_CHECK_SKIPPED,
+                "Expected check to depend on unifycodeCheck."
+        );
         this.assertContains(
                 result, UnifycodeGradlePluginFunctionalTest.SPOTLESS_CHECK,
                 "Expected spotlessCheck to be wired into check."

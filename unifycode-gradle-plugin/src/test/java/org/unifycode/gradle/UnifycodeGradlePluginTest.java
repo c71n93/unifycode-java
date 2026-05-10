@@ -97,6 +97,10 @@ class UnifycodeGradlePluginTest {
                         .contains("checkstyleMain"),
                 "Expected unifycodeCheck to depend on checkstyleMain."
         );
+        Assertions.assertTrue(
+                this.dependencies(this.task(project, "check")).contains(UnifycodeGradlePluginTest.UNIFYCODE_CHECK),
+                "Expected check to depend on unifycodeCheck."
+        );
     }
 
     @Test
