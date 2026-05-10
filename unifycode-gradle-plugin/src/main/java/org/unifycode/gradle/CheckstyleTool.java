@@ -5,9 +5,19 @@ import org.gradle.api.Project;
 import org.gradle.api.plugins.quality.CheckstyleExtension;
 
 final class CheckstyleTool {
+    /**
+     * Checkstyle configuration resource path.
+     */
     private static final String RESOURCE = "unifycode/checkstyle/checkstyle.xml";
 
+    /**
+     * Current project.
+     */
     private final Project project;
+
+    /**
+     * Resource copier.
+     */
     private final UnifycodeResources resources;
 
     CheckstyleTool(final Project project, final UnifycodeResources resources) {
@@ -16,8 +26,7 @@ final class CheckstyleTool {
     }
 
     CheckstyleTool(final Project project) {
-        this.project = project;
-        this.resources = new UnifycodeResources(project);
+        this(project, new UnifycodeResources(project));
     }
 
     void configure() {

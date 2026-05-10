@@ -7,8 +7,8 @@ public final class UnifycodeGradlePlugin implements Plugin<Project> {
     @Override
     public void apply(final Project project) {
         final UnifycodeExtension extension = project.getExtensions().create(
-                "unifycode",
-                UnifycodeExtension.class
+            "unifycode",
+            UnifycodeExtension.class
         );
         new UnifycodeTasks(project, extension).configure();
         project.getPluginManager().withPlugin("java-base", plugin -> project.afterEvaluate(ignored -> {

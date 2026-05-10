@@ -12,8 +12,15 @@ import org.gradle.testfixtures.ProjectBuilder;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-class UnifycodeGradlePluginTest {
+final class UnifycodeGradlePluginTest {
+    /**
+     * Formatting helper task name.
+     */
     private static final String FORMAT = "unifycodeFormat";
+
+    /**
+     * Verification helper task name.
+     */
     private static final String UNIFYCODE_CHECK = "unifycodeCheck";
 
     @Test
@@ -31,22 +38,22 @@ class UnifycodeGradlePluginTest {
         final Project project = ProjectBuilder.builder().build();
         new UnifycodeGradlePlugin().apply(project);
         Assertions
-                .assertNotNull(
-                        this.task(project, UnifycodeGradlePluginTest.FORMAT),
-                        "Expected unifycodeFormat task to exist."
-                );
+            .assertNotNull(
+                this.task(project, UnifycodeGradlePluginTest.FORMAT),
+                "Expected unifycodeFormat task to exist."
+            );
         Assertions.assertNotNull(
-                this.task(project, UnifycodeGradlePluginTest.UNIFYCODE_CHECK),
-                "Expected unifycodeCheck task to exist."
+            this.task(project, UnifycodeGradlePluginTest.UNIFYCODE_CHECK),
+            "Expected unifycodeCheck task to exist."
         );
         Assertions.assertNull(
-                project.getPlugins().findPlugin("checkstyle"),
-                "Expected Checkstyle plugin not to be applied."
+            project.getPlugins().findPlugin("checkstyle"),
+            "Expected Checkstyle plugin not to be applied."
         );
         Assertions.assertNull(project.getPlugins().findPlugin("pmd"), "Expected PMD plugin not to be applied.");
         Assertions.assertNull(
-                project.getPlugins().findPlugin("com.diffplug.spotless"),
-                "Expected Spotless plugin not to be applied."
+            project.getPlugins().findPlugin("com.diffplug.spotless"),
+            "Expected Spotless plugin not to be applied."
         );
     }
 
@@ -55,12 +62,12 @@ class UnifycodeGradlePluginTest {
         final Project project = ProjectBuilder.builder().build();
         project.getTasks().register(UnifycodeGradlePluginTest.FORMAT);
         final InvalidUserDataException exception = Assertions.assertThrows(
-                InvalidUserDataException.class,
-                () -> new UnifycodeGradlePlugin().apply(project)
+            InvalidUserDataException.class,
+            () -> new UnifycodeGradlePlugin().apply(project)
         );
         Assertions.assertTrue(
-                exception.getMessage().contains(UnifycodeGradlePluginTest.FORMAT),
-                "Expected duplicate task error to mention unifycodeFormat."
+            exception.getMessage().contains(UnifycodeGradlePluginTest.FORMAT),
+            "Expected duplicate task error to mention unifycodeFormat."
         );
     }
 
@@ -71,35 +78,35 @@ class UnifycodeGradlePluginTest {
         project.getPluginManager().apply("java");
         this.evaluate(project);
         Assertions.assertNotNull(
-                project.getPlugins().findPlugin("checkstyle"),
-                "Expected Checkstyle plugin to be applied."
+            project.getPlugins().findPlugin("checkstyle"),
+            "Expected Checkstyle plugin to be applied."
         );
         Assertions.assertNotNull(project.getPlugins().findPlugin("pmd"), "Expected PMD plugin to be applied.");
         Assertions.assertNotNull(
-                project.getPlugins().findPlugin("com.diffplug.spotless"),
-                "Expected Spotless plugin to be applied."
+            project.getPlugins().findPlugin("com.diffplug.spotless"),
+            "Expected Spotless plugin to be applied."
         );
         Assertions.assertTrue(
-                this.dependencies(this.task(project, UnifycodeGradlePluginTest.FORMAT)).contains("spotlessApply"),
-                "Expected unifycodeFormat task to depend on spotlessApply."
+            this.dependencies(this.task(project, UnifycodeGradlePluginTest.FORMAT)).contains("spotlessApply"),
+            "Expected unifycodeFormat task to depend on spotlessApply."
         );
         Assertions.assertTrue(
-                this.dependencies(this.task(project, UnifycodeGradlePluginTest.UNIFYCODE_CHECK))
-                        .contains("spotlessCheck"),
-                "Expected unifycodeCheck to depend on spotlessCheck."
+            this.dependencies(this.task(project, UnifycodeGradlePluginTest.UNIFYCODE_CHECK))
+                .contains("spotlessCheck"),
+            "Expected unifycodeCheck to depend on spotlessCheck."
         );
         Assertions.assertTrue(
-                this.dependencies(this.task(project, UnifycodeGradlePluginTest.UNIFYCODE_CHECK)).contains("pmdMain"),
-                "Expected unifycodeCheck to depend on pmdMain."
+            this.dependencies(this.task(project, UnifycodeGradlePluginTest.UNIFYCODE_CHECK)).contains("pmdMain"),
+            "Expected unifycodeCheck to depend on pmdMain."
         );
         Assertions.assertTrue(
-                this.dependencies(this.task(project, UnifycodeGradlePluginTest.UNIFYCODE_CHECK))
-                        .contains("checkstyleMain"),
-                "Expected unifycodeCheck to depend on checkstyleMain."
+            this.dependencies(this.task(project, UnifycodeGradlePluginTest.UNIFYCODE_CHECK))
+                .contains("checkstyleMain"),
+            "Expected unifycodeCheck to depend on checkstyleMain."
         );
         Assertions.assertTrue(
-                this.dependencies(this.task(project, "check")).contains(UnifycodeGradlePluginTest.UNIFYCODE_CHECK),
-                "Expected check to depend on unifycodeCheck."
+            this.dependencies(this.task(project, "check")).contains(UnifycodeGradlePluginTest.UNIFYCODE_CHECK),
+            "Expected check to depend on unifycodeCheck."
         );
     }
 
@@ -111,13 +118,13 @@ class UnifycodeGradlePluginTest {
         this.evaluate(project);
         final Path unifycode = project.getLayout().getBuildDirectory().getAsFile().get().toPath().resolve("unifycode");
         Assertions.assertTrue(
-                Files.exists(unifycode.resolve("checkstyle.xml")),
-                "Expected checkstyle.xml to be copied."
+            Files.exists(unifycode.resolve("checkstyle.xml")),
+            "Expected checkstyle.xml to be copied."
         );
         Assertions.assertTrue(Files.exists(unifycode.resolve("pmd.xml")), "Expected pmd.xml to be copied.");
         Assertions.assertTrue(
-                Files.exists(unifycode.resolve("eclipse-java-formatter.xml")),
-                "Expected eclipse-java-formatter.xml to be copied."
+            Files.exists(unifycode.resolve("eclipse-java-formatter.xml")),
+            "Expected eclipse-java-formatter.xml to be copied."
         );
     }
 
@@ -132,21 +139,21 @@ class UnifycodeGradlePluginTest {
         project.getPluginManager().apply("java");
         this.evaluate(project);
         Assertions.assertNull(
-                project.getPlugins().findPlugin("checkstyle"),
-                "Expected Checkstyle plugin not to be applied."
+            project.getPlugins().findPlugin("checkstyle"),
+            "Expected Checkstyle plugin not to be applied."
         );
         Assertions.assertNull(project.getPlugins().findPlugin("pmd"), "Expected PMD plugin not to be applied.");
         Assertions.assertNull(
-                project.getPlugins().findPlugin("com.diffplug.spotless"),
-                "Expected Spotless plugin not to be applied."
+            project.getPlugins().findPlugin("com.diffplug.spotless"),
+            "Expected Spotless plugin not to be applied."
         );
         Assertions.assertTrue(
-                this.dependencies(this.task(project, UnifycodeGradlePluginTest.FORMAT)).isEmpty(),
-                "Expected unifycodeFormat task to have no dependencies."
+            this.dependencies(this.task(project, UnifycodeGradlePluginTest.FORMAT)).isEmpty(),
+            "Expected unifycodeFormat task to have no dependencies."
         );
         Assertions.assertTrue(
-                this.dependencies(this.task(project, UnifycodeGradlePluginTest.UNIFYCODE_CHECK)).isEmpty(),
-                "Expected unifycodeCheck task to have no dependencies."
+            this.dependencies(this.task(project, UnifycodeGradlePluginTest.UNIFYCODE_CHECK)).isEmpty(),
+            "Expected unifycodeCheck task to have no dependencies."
         );
         final Path unifycode = project.getLayout().getBuildDirectory().getAsFile().get().toPath().resolve("unifycode");
         Assertions.assertFalse(Files.exists(unifycode), "Expected no unifycode config files to be copied.");
@@ -158,10 +165,10 @@ class UnifycodeGradlePluginTest {
 
     private Set<String> dependencies(final Task task) {
         return task.getTaskDependencies()
-                .getDependencies(task)
-                .stream()
-                .map(Task::getName)
-                .collect(Collectors.toSet());
+            .getDependencies(task)
+            .stream()
+            .map(Task::getName)
+            .collect(Collectors.toSet());
     }
 
     private void evaluate(final Project project) {

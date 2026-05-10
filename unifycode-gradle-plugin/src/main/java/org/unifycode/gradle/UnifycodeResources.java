@@ -10,6 +10,9 @@ import org.gradle.api.GradleException;
 import org.gradle.api.Project;
 
 final class UnifycodeResources {
+    /**
+     * Target directory for copied resources.
+     */
     private final File targetDir;
 
     UnifycodeResources(final File targetDir) {
@@ -28,13 +31,13 @@ final class UnifycodeResources {
             }
             Files.copy(input, targetFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
             return targetFile;
-        } catch (IOException exception) {
+        } catch (final IOException exception) {
             throw new UncheckedIOException("Could not copy resource: " + resourcePath, exception);
         }
     }
 
     File copy(final String resourcePath) {
-        // TODO: use Classpath functionality here.
+        // Resolve the target name from the last path segment for predictable output files.
         final int separator = resourcePath.lastIndexOf('/');
         final String targetFilename;
         if (separator < 0) {
@@ -47,8 +50,8 @@ final class UnifycodeResources {
 
     private static File createTargetDir(final Project project) {
         final File targetDir = new File(
-                project.getLayout().getBuildDirectory().getAsFile().get(),
-                "unifycode"
+            project.getLayout().getBuildDirectory().getAsFile().get(),
+            "unifycode"
         );
         if (!targetDir.exists() && !targetDir.mkdirs()) {
             throw new GradleException("Could not create directory: " + targetDir);

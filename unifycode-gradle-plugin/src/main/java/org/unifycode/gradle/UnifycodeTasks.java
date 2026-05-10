@@ -8,7 +8,14 @@ import org.gradle.api.plugins.quality.Checkstyle;
 import org.gradle.api.plugins.quality.Pmd;
 
 final class UnifycodeTasks {
+    /**
+     * Current project.
+     */
     private final Project project;
+
+    /**
+     * Plugin extension.
+     */
     private final UnifycodeExtension extension;
 
     UnifycodeTasks(final Project project, final UnifycodeExtension extension) {
@@ -47,6 +54,7 @@ final class UnifycodeTasks {
         return this.tasksTypedWhenEnabled(Pmd.class, this.extension.getPmdEnabled().get());
     }
 
+    // @checkstyle ReturnCount (8 lines)
     private Iterable<? extends Task> taskNamedWhenEnabled(final String name, final boolean enabled) {
         if (!enabled) {
             return Collections.emptyList();

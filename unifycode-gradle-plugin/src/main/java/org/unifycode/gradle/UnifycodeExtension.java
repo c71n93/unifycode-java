@@ -4,7 +4,10 @@ import org.gradle.api.provider.Property;
 
 public abstract class UnifycodeExtension {
 
-    @SuppressWarnings("PMD.ConstructorCallsOverridableMethod")
+    @SuppressWarnings({
+        "PMD.ConstructorCallsOverridableMethod",
+        "PMD.ConstructorOnlyInitializesOrCallOtherConstructors"
+    })
     public UnifycodeExtension() {
         this.getCheckstyleEnabled().convention(true);
         this.getPmdEnabled().convention(true);

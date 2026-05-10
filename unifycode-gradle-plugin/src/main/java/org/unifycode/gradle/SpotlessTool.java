@@ -5,9 +5,19 @@ import java.io.File;
 import org.gradle.api.Project;
 
 final class SpotlessTool {
+    /**
+     * Spotless formatter resource path.
+     */
     private static final String RESOURCE = "unifycode/spotless/eclipse-java-formatter.xml";
 
+    /**
+     * Current project.
+     */
     private final Project project;
+
+    /**
+     * Resource copier.
+     */
     private final UnifycodeResources resources;
 
     SpotlessTool(final Project project, final UnifycodeResources resources) {
@@ -16,8 +26,7 @@ final class SpotlessTool {
     }
 
     SpotlessTool(final Project project) {
-        this.project = project;
-        this.resources = new UnifycodeResources(project);
+        this(project, new UnifycodeResources(project));
     }
 
     void configure() {
