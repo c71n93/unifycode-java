@@ -3,6 +3,9 @@ package org.unifycode.gradle;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
 
+/**
+ * Gradle plugin entry point for Unifycode quality tooling.
+ */
 public final class UnifycodeGradlePlugin implements Plugin<Project> {
     @Override
     public void apply(final Project project) {

@@ -2,7 +2,7 @@ plugins {
     id 'base'
     id 'com.diffplug.spotless' version '8.4.0'
     // TODO: This solution of using a commit which is one before last is temporal. Further some release system will be used.
-    id 'org.unifycode' version '6ee0b8259e' apply false
+    id 'org.unifycode' version 'ac18d1e943' apply false
 }
 
 def useRemoteUnifycodePlugin = System.getenv('JITPACK') == null
