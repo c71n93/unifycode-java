@@ -1,4 +1,4 @@
-package org.unifycode.gradle;
+package org.unifycode.gradle.tool;
 
 import java.io.File;
 import java.io.IOException;
@@ -9,21 +9,41 @@ import java.nio.file.StandardCopyOption;
 import org.gradle.api.GradleException;
 import org.gradle.api.Project;
 
+/**
+ * Resource copier.
+ */
 final class UnifycodeResources {
     /**
      * Target directory for copied resources.
      */
     private final File targetDir;
 
+    /**
+     * New resource copier with the given target directory.
+     *
+     * @param targetDir target directory.
+     */
     UnifycodeResources(final File targetDir) {
         this.targetDir = targetDir;
     }
 
+    /**
+     * New resource copier for the given project.
+     *
+     * @param project current project.
+     */
     UnifycodeResources(final Project project) {
         this(createTargetDir(project));
     }
 
-    File copy(final String resourcePath, final String targetFilename) {
+    /**
+     * Copies a classpath resource into the target directory.
+     *
+     * @param resourcePath resource path.
+     * @param targetFilename target filename.
+     * @return copied file.
+     */
+    public File copy(final String resourcePath, final String targetFilename) {
         final File targetFile = new File(this.targetDir, targetFilename);
         try (InputStream input = UnifycodeResources.class.getResourceAsStream("/" + resourcePath)) {
             if (input == null) {
@@ -36,7 +56,13 @@ final class UnifycodeResources {
         }
     }
 
-    File copy(final String resourcePath) {
+    /**
+     * Copies a classpath resource using its final path segment as the filename.
+     *
+     * @param resourcePath resource path.
+     * @return copied file.
+     */
+    public File copy(final String resourcePath) {
         // Resolve the target name from the last path segment for predictable output files.
         final int separator = resourcePath.lastIndexOf('/');
         final String targetFilename;

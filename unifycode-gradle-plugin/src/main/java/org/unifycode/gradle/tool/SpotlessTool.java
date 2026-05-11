@@ -1,10 +1,13 @@
-package org.unifycode.gradle;
+package org.unifycode.gradle.tool;
 
 import com.diffplug.gradle.spotless.SpotlessExtension;
 import java.io.File;
 import org.gradle.api.Project;
 
-final class SpotlessTool {
+/**
+ * Spotless configuration tool.
+ */
+public final class SpotlessTool {
     /**
      * Spotless formatter resource path.
      */
@@ -20,16 +23,30 @@ final class SpotlessTool {
      */
     private final UnifycodeResources resources;
 
-    SpotlessTool(final Project project, final UnifycodeResources resources) {
+    /**
+     * New tool configured with an explicit resource copier.
+     *
+     * @param project current project.
+     * @param resources resource copier.
+     */
+    public SpotlessTool(final Project project, final UnifycodeResources resources) {
         this.project = project;
         this.resources = resources;
     }
 
-    SpotlessTool(final Project project) {
+    /**
+     * New tool configured for the given project.
+     *
+     * @param project current project.
+     */
+    public SpotlessTool(final Project project) {
         this(project, new UnifycodeResources(project));
     }
 
-    void configure() {
+    /**
+     * Applies Spotless and configures its formatter.
+     */
+    public void configure() {
         this.project.getPluginManager().apply("com.diffplug.spotless");
         final File config = this.resources.copy(SpotlessTool.RESOURCE);
         this.project.getExtensions().configure(SpotlessExtension.class, extension -> extension.java(java -> {

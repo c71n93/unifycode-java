@@ -192,14 +192,18 @@
         <module name="JavadocType">
             <property name="allowUnknownTags" value="true" />
         </module>
-        <module name="MissingJavadocType" />
-        <module name="MissingJavadocMethod" />
+        <module name="MissingJavadocType">
+            <property name="scope" value="package" />
+        </module>
+        <module name="MissingJavadocMethod">
+            <property name="scope" value="package" />
+        </module>
         <module name="JavadocMethod" />
         <module name="JavadocVariable" />
         <module name="JavadocStyle" />
         <module name="AtclauseOrder">
             <property name="tagOrder"
-                value="@param, @return, @throws, @exception, @see, @since, @serial, @serialField,                 @serialData, @deprecated, @todo, @checkstyle" />
+                value="@param, @return, @throws, @exception, @see, @since, @serial, @serialField, @serialData, @deprecated, @todo, @checkstyle" />
         </module>
         <!-- Metrics. -->
         <module name="BooleanExpressionComplexity" />

@@ -2,6 +2,9 @@ package org.unifycode.gradle;
 
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
+import org.unifycode.gradle.tool.CheckstyleTool;
+import org.unifycode.gradle.tool.PmdTool;
+import org.unifycode.gradle.tool.SpotlessTool;
 
 /**
  * Gradle plugin entry point for Unifycode quality tooling.

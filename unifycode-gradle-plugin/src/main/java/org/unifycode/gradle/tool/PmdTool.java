@@ -1,11 +1,14 @@
-package org.unifycode.gradle;
+package org.unifycode.gradle.tool;
 
 import java.io.File;
 import java.util.Collections;
 import org.gradle.api.Project;
 import org.gradle.api.plugins.quality.PmdExtension;
 
-final class PmdTool {
+/**
+ * PMD configuration tool.
+ */
+public final class PmdTool {
     /**
      * PMD ruleset resource path.
      */
@@ -21,16 +24,30 @@ final class PmdTool {
      */
     private final UnifycodeResources resources;
 
-    PmdTool(final Project project, final UnifycodeResources resources) {
+    /**
+     * New tool configured with an explicit resource copier.
+     *
+     * @param project current project.
+     * @param resources resource copier.
+     */
+    public PmdTool(final Project project, final UnifycodeResources resources) {
         this.project = project;
         this.resources = resources;
     }
 
-    PmdTool(final Project project) {
+    /**
+     * New tool configured for the given project.
+     *
+     * @param project current project.
+     */
+    public PmdTool(final Project project) {
         this(project, new UnifycodeResources(project));
     }
 
-    void configure() {
+    /**
+     * Applies PMD and configures its ruleset.
+     */
+    public void configure() {
         this.project.getPluginManager().apply("pmd");
         final File config = this.resources.copy(PmdTool.RESOURCE);
         this.project.getExtensions().configure(PmdExtension.class, extension -> {

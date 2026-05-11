@@ -2,7 +2,6 @@ plugins {
     id 'java-gradle-plugin'
 }
 
-// @todo #2:30min Replace the custom functionalTest wiring with a simpler Gradle-native setup if possible.
 def functionalTest = sourceSets.create('functionalTest')
 
 configurations[functionalTest.implementationConfigurationName].extendsFrom(configurations.testImplementation)

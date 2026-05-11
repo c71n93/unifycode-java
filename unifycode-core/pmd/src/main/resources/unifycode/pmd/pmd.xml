@@ -17,7 +17,6 @@
         <exclude name="AtLeastOneConstructor" />
         <exclude name="LongVariable" />
         <exclude name="OnlyOneReturn" /> <!-- We are use checkstyle ReturnCount check instead -->
-        <exclude name="CommentDefaultAccessModifier" />
     </rule>
 
     <rule ref="category/java/design.xml">
