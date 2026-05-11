@@ -15,13 +15,13 @@
         <exclude name="ShortVariable" />
         <exclude name="UnnecessaryFullyQualifiedName" />
         <exclude name="AtLeastOneConstructor" />
-        <exclude name="LongVariable" /> <!-- TODO: not sure about this rule -->
-        <exclude name="OnlyOneReturn" /> <!-- TODO: not sure about this rule. Maybe try to use checkstyle ReturnCount check -->
-        <exclude name="CommentDefaultAccessModifier" /> <!-- TODO: not sure about this rule -->
+        <exclude name="LongVariable" />
+        <exclude name="OnlyOneReturn" /> <!-- We are use checkstyle ReturnCount check instead -->
+        <exclude name="CommentDefaultAccessModifier" />
     </rule>
 
     <rule ref="category/java/design.xml">
-        <exclude name="LawOfDemeter" /> <!-- TODO: not sure about this rule -->
+        <exclude name="LawOfDemeter" /> <!-- @review Re-evaluate whether the LawOfDemeter PMD rule belongs in the default ruleset. -->
         <exclude name="TooManyMethods" />
         <exclude name="LoosePackageCoupling" />
     </rule>
@@ -34,16 +34,16 @@
 
 
     <rule ref="category/java/documentation.xml">
-        <exclude name="CommentRequired" /> <!-- TODO: not sure about this rule -->
+        <exclude name="CommentRequired" /> <!-- @review Re-evaluate whether the CommentRequired PMD rule belongs in the default ruleset. -->
         <exclude name="CommentSize" />
     </rule>
 
     <rule ref="category/java/errorprone.xml">
-        <exclude name="AvoidFieldNameMatchingMethodName" /> <!-- TODO: not sure about this rule -->
+        <exclude name="AvoidFieldNameMatchingMethodName" />
         <exclude name="AvoidLiteralsInIfCondition" />
     </rule>
 
-    <!-- TODO: turn this categories on eventually -->
+    <!-- @review Revisit the disabled PMD performance and multithreading categories for possible enablement. -->
     <!-- <rule ref="category/java/performance.xml"/> -->
     <!-- <rule ref="category/java/multithreading.xml"/> -->
 

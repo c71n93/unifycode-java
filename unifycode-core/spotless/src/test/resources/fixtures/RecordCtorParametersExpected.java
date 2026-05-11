@@ -16,7 +16,7 @@ public class RecordCtorParametersExpected {
                                         String storeEventName,
                                         List<String> loadMetricNames,
                                         List<String> storeMetricNames)
-        // TODO: Better extra indent for wrapped `implements` than body-level indent.
+        // @todo #3:20min Improve wrapped `implements` indentation beyond the current body-level alignment.
         implements MemoryEvents {
         public AvailableMemoryEvents {
             loadMetricNames = List.copyOf(loadMetricNames);

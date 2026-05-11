@@ -4,7 +4,7 @@
     <property name="charset" value="UTF-8" />
     <!-- Enforces English locale to be independent from the default locale which may vary between environments. -->
     <property name="localeLanguage" value="en" />
-    <!-- TODO: Speeds up style check for already validated files -->
+    <!-- @review Restore Checkstyle cache support after confirming it works with this build layout. -->
     <!-- <property name="cacheFile" value="${cache.file}" /> -->
     <!-- Checks that each Java package has a Javadoc file used for commenting. -->
     <module name="JavadocPackage" />
@@ -16,7 +16,7 @@
     <!-- Checks that property files contain the same keys. -->
     <module name="Translation" />
     <!-- Checks for duplicate code -->
-    <!-- TODO: Find out what's the problem. Enable it or remove -->
+    <!-- @review Investigate StrictDuplicateCode and either enable it or remove the commented rule. -->
     <!-- https://sourceforge.net/p/checkstyle/bugs/693/ -->
     <!-- <module name="StrictDuplicateCode"/> -->
     <!-- Maximum number of lines in any .java file is limited. -->
@@ -100,9 +100,9 @@
         <property name="id" value="StartLineSymbolLimits" />
         <property name="message" value="Line cannot start with this symbol, move it to the previous line" />
     </module>
-    <!-- TODO: Implement suppressions -->
+    <!-- @review Add a suppression file strategy for Checkstyle or remove the commented configuration. -->
     <!-- <module name="SuppressionFilter">
-        <property name="file" value="/com/qulice/checkstyle/suppressions.xml" />
+        <property name="file" value="/path/to/suppressions.xml" />
         <property name="optional" value="false" />
     </module> -->
     <module name="TreeWalker">

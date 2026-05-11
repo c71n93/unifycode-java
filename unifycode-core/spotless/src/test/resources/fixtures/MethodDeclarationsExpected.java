@@ -5,7 +5,7 @@ import java.io.IOException;
 final class MethodDeclarationsFixture {
     void writeValues(final String firstVeryLongParameterName, final String secondVeryLongParameterName,
                      final String thirdVeryLongParameterName)
-        // TODO: Better extra indent for wrapped `throws` than body-level indent.
+        // @todo #3:20min Improve wrapped `throws` indentation beyond the current body-level alignment.
         throws IOException {
         if (firstVeryLongParameterName.isBlank()) {
             throw new IOException();

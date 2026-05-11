@@ -1,7 +1,7 @@
 plugins {
     id 'base'
     id 'com.diffplug.spotless' version '8.4.0'
-    // TODO: This solution of using a commit which is one before last is temporal. Further some release system will be used.
+    // @todo #2:20min Replace the temporary commit-pin plugin version with a proper release process.
     id 'org.unifycode' version 'ac18d1e943' apply false
 }
 

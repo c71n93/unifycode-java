@@ -136,6 +136,6 @@ final class SpotlessFormatterTest {
     }
 
     private String expectedResource(final String path) throws IOException {
-        return this.resource(path).replaceAll("(?m)^\\s*// TODO.*\\n?", "");
+        return this.resource(path).replaceAll("(?m)^\\s*// (?:TODO|@todo).*\\n?", "");
     }
 }
