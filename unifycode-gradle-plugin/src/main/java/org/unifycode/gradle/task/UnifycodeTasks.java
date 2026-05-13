@@ -1,4 +1,4 @@
-package org.unifycode.gradle;
+package org.unifycode.gradle.task;
 
 import java.util.Collections;
 import java.util.concurrent.Callable;
@@ -6,11 +6,12 @@ import org.gradle.api.Project;
 import org.gradle.api.Task;
 import org.gradle.api.plugins.quality.Checkstyle;
 import org.gradle.api.plugins.quality.Pmd;
+import org.unifycode.gradle.UnifycodeExtension;
 
 /**
  * UnifyCode helper task registration.
  */
-final class UnifycodeTasks {
+public final class UnifycodeTasks {
     /**
      * Current project.
      */
