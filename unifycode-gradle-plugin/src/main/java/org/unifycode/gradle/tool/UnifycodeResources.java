@@ -23,7 +23,7 @@ final class UnifycodeResources {
      *
      * @param targetDir target directory.
      */
-    UnifycodeResources(final File targetDir) {
+    public UnifycodeResources(final File targetDir) {
         this.targetDir = targetDir;
     }
 
@@ -32,7 +32,7 @@ final class UnifycodeResources {
      *
      * @param project current project.
      */
-    UnifycodeResources(final Project project) {
+    public UnifycodeResources(final Project project) {
         this(createTargetDir(project));
     }
 

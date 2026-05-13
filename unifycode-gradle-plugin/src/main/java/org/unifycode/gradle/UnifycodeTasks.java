@@ -18,12 +18,12 @@ final class UnifycodeTasks {
      */
     private final UnifycodeExtension extension;
 
-    UnifycodeTasks(final Project project, final UnifycodeExtension extension) {
+    public UnifycodeTasks(final Project project, final UnifycodeExtension extension) {
         this.project = project;
         this.extension = extension;
     }
 
-    void configure() {
+    public void configure() {
         this.project.getTasks().register("unifycodeFormat", task -> {
             task.setGroup("formatting");
             task.setDescription("Runs source formatting via Spotless.");

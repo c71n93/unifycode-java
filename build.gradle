@@ -2,7 +2,7 @@ plugins {
     id 'base'
     id 'com.diffplug.spotless' version '8.4.0'
     // @todo #2:20min Replace the temporary commit-pin plugin version with a proper release process.
-    id 'org.unifycode' version 'ac18d1e943' apply false
+    id 'org.unifycode' version '22194e28c4' apply false
 }
 
 def useRemoteUnifycodePlugin = System.getenv('JITPACK') == null

@@ -49,6 +49,7 @@ public final class CheckstyleTool {
     public void configure() {
         this.project.getPluginManager().apply("checkstyle");
         final File config = this.resources.copy(CheckstyleTool.RESOURCE);
+        // @todo #2:30min Pin Checkstyle toolVersion to an up-to-date release instead of relying on Gradle defaults.
         this.project.getExtensions().configure(CheckstyleExtension.class, extension -> extension.setConfigFile(config));
     }
 }

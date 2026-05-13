@@ -228,7 +228,12 @@
         <module name="OuterTypeFilename" />
         <!-- Modifier Checks. -->
         <module name="ModifierOrder" />
-        <module name="RedundantModifier" />
+        <!-- @todo #2:30min Add a functional test that proves package-private classes may declare public constructors
+            without RedundantModifier conflicting with PMD CommentDefaultAccessModifier. -->
+        <module name="RedundantModifier">
+            <property name="tokens"
+                value="METHOD_DEF,VARIABLE_DEF,ANNOTATION_FIELD_DEF,INTERFACE_DEF,CLASS_DEF,ENUM_DEF,RESOURCE" />
+        </module>
         <!-- Checks for Naming Conventions. -->
         <module name="AbbreviationAsWordInNameCheck" />
         <module name="ClassTypeParameterName" />
