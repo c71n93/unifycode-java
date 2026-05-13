@@ -121,6 +121,10 @@ final class UnifycodeGradlePluginTest {
             Files.exists(unifycode.resolve("checkstyle.xml")),
             "Expected checkstyle.xml to be copied."
         );
+        Assertions.assertTrue(
+            Files.exists(unifycode.resolve("checkstyle-suppressions.xml")),
+            "Expected checkstyle-suppressions.xml to be copied."
+        );
         Assertions.assertTrue(Files.exists(unifycode.resolve("pmd.xml")), "Expected pmd.xml to be copied.");
         Assertions.assertTrue(
             Files.exists(unifycode.resolve("eclipse-java-formatter.xml")),

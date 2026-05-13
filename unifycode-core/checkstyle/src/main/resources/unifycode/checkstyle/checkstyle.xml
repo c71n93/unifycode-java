@@ -100,11 +100,10 @@
         <property name="id" value="StartLineSymbolLimits" />
         <property name="message" value="Line cannot start with this symbol, move it to the previous line" />
     </module>
-    <!-- @review Add a suppression file strategy for Checkstyle or remove the commented configuration. -->
-    <!-- <module name="SuppressionFilter">
-        <property name="file" value="/path/to/suppressions.xml" />
+    <module name="SuppressionFilter">
+        <property name="file" value="${unifycode.checkstyle.suppressions}" />
         <property name="optional" value="false" />
-    </module> -->
+    </module>
     <module name="TreeWalker">
         <module name="SuppressWithNearbyCommentFilter">
             <property name="commentFormat" value="@checkstyle (\w+) \((\d+) lines?\)" />

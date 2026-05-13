@@ -33,6 +33,12 @@ final class UnifycodeGradlePluginFunctionalTest {
 
     private static final String CHECKSTYLE_MAIN = ":checkstyleMain SKIPPED";
 
+    private static final String CHECKSTYLE_TEST_TASK = "checkstyleTest";
+
+    private static final String DEMO_PACKAGE = "package demo;\n";
+
+    private static final String METHOD_END = "    }\n";
+
     private static final String BLOCK_END = "}\n";
 
     /**
@@ -274,12 +280,91 @@ final class UnifycodeGradlePluginFunctionalTest {
         );
     }
 
+    @Test
+    void checkstyleIgnoresJavadocsForActualTests() throws IOException {
+        this.writeConsumerProject(UnifycodeGradlePluginFunctionalTest.JAVA_AND_UNIFYCODE, "");
+        this.writeTestPackageInfo();
+        this.writeFile(
+            "src/test/java/demo/AppTest.java",
+            UnifycodeGradlePluginFunctionalTest.DEMO_PACKAGE
+                + "\n"
+                + "/**\n"
+                + " * Application test.\n"
+                + " */\n"
+                + "final class AppTest {\n"
+                + "    void runs() {\n"
+                + UnifycodeGradlePluginFunctionalTest.METHOD_END
+                + UnifycodeGradlePluginFunctionalTest.BLOCK_END
+        );
+        final BuildResult result = this.run(UnifycodeGradlePluginFunctionalTest.CHECKSTYLE_TEST_TASK);
+        this.assertContains(result, ":checkstyleTest", "Expected Checkstyle to inspect actual test classes.");
+    }
+
+    @Test
+    void checkstyleRequiresTypeJavadocsForActualTests() throws IOException {
+        this.writeConsumerProject(UnifycodeGradlePluginFunctionalTest.JAVA_AND_UNIFYCODE, "");
+        this.writeTestPackageInfo();
+        this.writeFile(
+            "src/test/java/demo/AppTest.java",
+            UnifycodeGradlePluginFunctionalTest.DEMO_PACKAGE
+                + "\n"
+                + "final class AppTest {\n"
+                + "    /**\n"
+                + "     * Runs.\n"
+                + "     */\n"
+                + "    void runs() {\n"
+                + UnifycodeGradlePluginFunctionalTest.METHOD_END
+                + UnifycodeGradlePluginFunctionalTest.BLOCK_END
+        );
+        this.runAndFail(UnifycodeGradlePluginFunctionalTest.CHECKSTYLE_TEST_TASK);
+        this.assertCheckstyleReportContains(
+            "MissingJavadocType",
+            "Expected actual test classes to require type Javadocs."
+        );
+    }
+
+    @Test
+    void checkstyleRequiresJavadocsForTestInfrastructure() throws IOException {
+        this.writeConsumerProject(UnifycodeGradlePluginFunctionalTest.JAVA_AND_UNIFYCODE, "");
+        this.writeTestPackageInfo();
+        this.writeFile(
+            "src/test/java/demo/FakeApp.java",
+            UnifycodeGradlePluginFunctionalTest.DEMO_PACKAGE
+                + "\n"
+                + "final class FakeApp {\n"
+                + "    String value() {\n"
+                + "        return \"value\";\n"
+                + UnifycodeGradlePluginFunctionalTest.METHOD_END
+                + UnifycodeGradlePluginFunctionalTest.BLOCK_END
+        );
+        this.runAndFail(UnifycodeGradlePluginFunctionalTest.CHECKSTYLE_TEST_TASK);
+        this.assertCheckstyleReportContains("MissingJavadoc", "Expected test infrastructure to require Javadocs.");
+    }
+
     private BuildResult run(final String... arguments) {
         return GradleRunner.create()
             .withProjectDir(this.testProjectDir.toFile())
             .withArguments(arguments)
             .withPluginClasspath()
             .build();
+    }
+
+    private BuildResult runAndFail(final String... arguments) {
+        return GradleRunner.create()
+            .withProjectDir(this.testProjectDir.toFile())
+            .withArguments(arguments)
+            .withPluginClasspath()
+            .buildAndFail();
+    }
+
+    private void writeTestPackageInfo() throws IOException {
+        this.writeFile(
+            "src/test/java/demo/package-info.java",
+            "/**\n"
+                + " * Test package.\n"
+                + " */\n"
+                + UnifycodeGradlePluginFunctionalTest.DEMO_PACKAGE
+        );
     }
 
     private void writeConsumerProject(final String plugins, final String extraBuildScript) throws IOException {
@@ -326,6 +411,13 @@ final class UnifycodeGradlePluginFunctionalTest {
         Assertions.assertFalse(
             result.getOutput().contains(fragment),
             () -> message + "\nOutput:\n" + result.getOutput()
+        );
+    }
+
+    private void assertCheckstyleReportContains(final String fragment, final String message) throws IOException {
+        Assertions.assertTrue(
+            Files.readString(this.testProjectDir.resolve("build/reports/checkstyle/test.xml")).contains(fragment),
+            message
         );
     }
 
