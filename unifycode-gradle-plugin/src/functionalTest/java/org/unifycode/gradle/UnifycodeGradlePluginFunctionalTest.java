@@ -10,6 +10,9 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
 // @checkstyle JavadocVariable (25 lines)
+/**
+ * Functional tests for the UnifyCode Gradle plugin.
+ */
 final class UnifycodeGradlePluginFunctionalTest {
     private static final String JAVA_AND_UNIFYCODE = "    id 'java'\n    id 'org.unifycode'\n";
 

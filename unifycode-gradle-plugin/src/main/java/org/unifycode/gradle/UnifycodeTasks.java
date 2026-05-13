@@ -7,6 +7,9 @@ import org.gradle.api.Task;
 import org.gradle.api.plugins.quality.Checkstyle;
 import org.gradle.api.plugins.quality.Pmd;
 
+/**
+ * UnifyCode helper task registration.
+ */
 final class UnifycodeTasks {
     /**
      * Current project.
@@ -18,11 +21,20 @@ final class UnifycodeTasks {
      */
     private final UnifycodeExtension extension;
 
+    /**
+     * New helper task registration.
+     *
+     * @param project current project.
+     * @param extension plugin extension.
+     */
     public UnifycodeTasks(final Project project, final UnifycodeExtension extension) {
         this.project = project;
         this.extension = extension;
     }
 
+    /**
+     * Configure helper tasks.
+     */
     public void configure() {
         this.project.getTasks().register("unifycodeFormat", task -> {
             task.setGroup("formatting");

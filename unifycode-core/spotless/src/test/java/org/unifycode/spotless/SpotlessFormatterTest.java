@@ -10,6 +10,9 @@ import org.gradle.testkit.runner.GradleRunner;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
+/**
+ * Formatter fixture tests for the UnifyCode Spotless assets.
+ */
 final class SpotlessFormatterTest {
 
     @Test

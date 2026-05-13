@@ -12,6 +12,9 @@ import org.gradle.testfixtures.ProjectBuilder;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
+/**
+ * Unit tests for the UnifyCode Gradle plugin.
+ */
 final class UnifycodeGradlePluginTest {
     /**
      * Formatting helper task name.
