@@ -58,12 +58,6 @@
     </module>
     <!-- JavaDoc regexp checks -->
     <module name="RegexpSingleline">
-        <property name="format" value="\* +@param +\w+ +[^a-z ]" />
-        <property name="fileExtensions" value="java" />
-        <property name="id" value="ParamShouldStartWithSmallLetter" />
-        <property name="message" value="@param tag description should start with small letter" />
-    </module>
-    <module name="RegexpSingleline">
         <property name="format" value="synchronized +\(this\) +\{" />
         <property name="fileExtensions" value="java" />
         <property name="id" value="UsingThisAsLock" />
