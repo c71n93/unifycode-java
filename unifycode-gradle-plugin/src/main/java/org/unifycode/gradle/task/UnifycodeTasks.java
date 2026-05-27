@@ -2,10 +2,10 @@ package org.unifycode.gradle.task;
 
 import java.util.Collections;
 import java.util.concurrent.Callable;
-import org.gradle.api.Project;
 import org.gradle.api.Task;
 import org.gradle.api.plugins.quality.Checkstyle;
 import org.gradle.api.plugins.quality.Pmd;
+import org.gradle.api.tasks.TaskContainer;
 import org.unifycode.gradle.UnifycodeExtension;
 
 /**
@@ -13,9 +13,9 @@ import org.unifycode.gradle.UnifycodeExtension;
  */
 public final class UnifycodeTasks {
     /**
-     * Current project.
+     * Gradle task container.
      */
-    private final Project project;
+    private final TaskContainer tasks;
 
     /**
      * Plugin extension.
@@ -25,29 +25,31 @@ public final class UnifycodeTasks {
     /**
      * New helper task registration.
      *
-     * @param project current project.
+     * @param tasks gradle task container.
      * @param extension plugin extension.
      */
-    public UnifycodeTasks(final Project project, final UnifycodeExtension extension) {
-        this.project = project;
+    public UnifycodeTasks(final TaskContainer tasks, final UnifycodeExtension extension) {
+        this.tasks = tasks;
         this.extension = extension;
     }
 
     /**
      * Configure helper tasks.
+     *
+     * @todo: #2:30min Make unifycodeFormat and unifycodeCheck fields instead of hard coded values.
      */
     public void configure() {
-        this.project.getTasks().register("unifycodeFormat", task -> {
+        this.tasks.register("unifycodeFormat", task -> {
             task.setGroup("formatting");
             task.setDescription("Runs source formatting via Spotless.");
             task.dependsOn((Callable<Iterable<? extends Task>>) this::spotlessApplyTasks);
         });
-        this.project.getTasks().register("unifycodeCheck", task -> {
+        this.tasks.register("unifycodeCheck", task -> {
             task.setGroup("verification");
             task.setDescription("Runs static analysis checks without launching tests.");
             task.dependsOn((Callable<Iterable<? extends Task>>) this::spotlessCheckTasks);
-            task.dependsOn(this.checkstyleTasks());
-            task.dependsOn(this.pmdTasks());
+            task.dependsOn((Callable<Iterable<? extends Task>>) this::checkstyleTasks);
+            task.dependsOn((Callable<Iterable<? extends Task>>) this::pmdTasks);
         });
     }
 
@@ -72,7 +74,7 @@ public final class UnifycodeTasks {
         if (!enabled) {
             return Collections.emptyList();
         }
-        final Task task = this.project.getTasks().findByName(name);
+        final Task task = this.tasks.findByName(name);
         if (task == null) {
             return Collections.emptyList();
         }
@@ -83,6 +85,6 @@ public final class UnifycodeTasks {
         if (!enabled) {
             return Collections.emptyList();
         }
-        return this.project.getTasks().withType(type);
+        return this.tasks.withType(type);
     }
 }

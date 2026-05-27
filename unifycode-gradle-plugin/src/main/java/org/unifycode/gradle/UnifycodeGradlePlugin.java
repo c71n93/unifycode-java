@@ -17,7 +17,7 @@ public final class UnifycodeGradlePlugin implements Plugin<Project> {
             "unifycode",
             UnifycodeExtension.class
         );
-        new UnifycodeTasks(project, extension).configure();
+        new UnifycodeTasks(project.getTasks(), extension).configure();
         project.getPluginManager().withPlugin("java-base", plugin -> project.afterEvaluate(ignored -> {
             if (extension.getCheckstyleEnabled().get()) {
                 new CheckstyleTool(project).configure();
