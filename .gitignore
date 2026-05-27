@@ -12,3 +12,4 @@ build/
 CLAUDE.md
 AGENTS.md
 issues/
+.vscode/agent-notes.json

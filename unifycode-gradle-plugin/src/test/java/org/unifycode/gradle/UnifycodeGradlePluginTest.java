@@ -8,6 +8,8 @@ import org.gradle.api.InvalidUserDataException;
 import org.gradle.api.Project;
 import org.gradle.api.Task;
 import org.gradle.api.internal.project.ProjectInternal;
+import org.gradle.api.plugins.quality.CheckstyleExtension;
+import org.gradle.api.plugins.quality.PmdExtension;
 import org.gradle.testfixtures.ProjectBuilder;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -32,6 +34,18 @@ final class UnifycodeGradlePluginTest {
         new UnifycodeGradlePlugin().apply(project);
         final UnifycodeExtension extension = project.getExtensions().getByType(UnifycodeExtension.class);
         Assertions.assertNotNull(extension, "Expected unifycode extension to exist.");
+    }
+
+    @Test
+    void applyCreatesStrictQualityToolPoliciesByDefault() {
+        final Project project = ProjectBuilder.builder().build();
+        new UnifycodeGradlePlugin().apply(project);
+        final UnifycodeExtension extension = project.getExtensions().getByType(UnifycodeExtension.class);
+        Assertions.assertTrue(
+            extension.getCheckstyle().getStrict().get(),
+            "Expected Checkstyle to be strict by default."
+        );
+        Assertions.assertTrue(extension.getPmd().getStrict().get(), "Expected PMD to be strict by default.");
     }
 
     @Test
@@ -108,6 +122,25 @@ final class UnifycodeGradlePluginTest {
         Assertions.assertTrue(
             this.dependencies(this.task(project, "check")).contains(UnifycodeGradlePluginTest.UNIFYCODE_CHECK),
             "Expected check to depend on unifycodeCheck."
+        );
+    }
+
+    @Test
+    void appliesConfiguredStrictnessAfterJavaPluginAppears() {
+        final Project project = ProjectBuilder.builder().build();
+        new UnifycodeGradlePlugin().apply(project);
+        final UnifycodeExtension extension = project.getExtensions().getByType(UnifycodeExtension.class);
+        extension.checkstyle(policy -> policy.getStrict().set(false));
+        extension.pmd(policy -> policy.getStrict().set(false));
+        project.getPluginManager().apply("java");
+        this.evaluate(project);
+        Assertions.assertTrue(
+            project.getExtensions().getByType(CheckstyleExtension.class).isIgnoreFailures(),
+            "Expected non-strict Checkstyle to ignore failures."
+        );
+        Assertions.assertTrue(
+            project.getExtensions().getByType(PmdExtension.class).isIgnoreFailures(),
+            "Expected non-strict PMD to ignore failures."
         );
     }
 

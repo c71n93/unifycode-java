@@ -28,7 +28,7 @@ public final class UnifycodeTasks {
     /**
      * Configure helper tasks.
      *
-     * @todo: #2:30min Make unifycodeFormat and unifycodeCheck fields instead of hard coded values.
+     * @todo #2:30min Make unifycodeFormat and unifycodeCheck fields instead of hard coded values.
      */
     public void configure() {
         this.tasks.register("unifycodeFormat", task -> {

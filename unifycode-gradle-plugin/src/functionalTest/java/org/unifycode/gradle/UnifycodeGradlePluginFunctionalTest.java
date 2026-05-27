@@ -38,7 +38,18 @@ final class UnifycodeGradlePluginFunctionalTest {
 
     private static final String CHECKSTYLE_TEST_TASK = "checkstyleTest";
 
+    private static final String CHECKSTYLE_MAIN_TASK = "checkstyleMain";
+
+    private static final String PMD_MAIN_TASK = "pmdMain";
+
     private static final String DEMO_PACKAGE = "package demo;\n";
+
+    private static final String MISSING_JAVADOC_TYPE = "MissingJavadocType";
+
+    private static final String STRICT_FALSE = "        strict = false\n";
+
+    private static final String INDENTED_BLOCK_END = "    "
+        + UnifycodeGradlePluginFunctionalTest.BLOCK_END;
 
     private static final String METHOD_END = "    }\n";
 
@@ -220,6 +231,89 @@ final class UnifycodeGradlePluginFunctionalTest {
         this.assertCheckstyleReportContains("MissingJavadoc", "Expected test infrastructure to require Javadocs.");
     }
 
+    @Test
+    void nonStrictCheckstyleReportsViolationsWithoutFailingBuild() throws IOException {
+        this.writeConsumerProject(
+            UnifycodeGradlePluginFunctionalTest.JAVA_AND_UNIFYCODE,
+            "unifycode {\n"
+                + "    checkstyle {\n"
+                + UnifycodeGradlePluginFunctionalTest.STRICT_FALSE
+                + UnifycodeGradlePluginFunctionalTest.INDENTED_BLOCK_END
+                + UnifycodeGradlePluginFunctionalTest.BLOCK_END
+                + "\n"
+        );
+        this.run(UnifycodeGradlePluginFunctionalTest.CHECKSTYLE_MAIN_TASK);
+        this.assertCheckstyleMainReportContains(
+            UnifycodeGradlePluginFunctionalTest.MISSING_JAVADOC_TYPE,
+            "Expected non-strict Checkstyle to write violation details."
+        );
+    }
+
+    @Test
+    void strictCheckstyleFailsBuildOnViolations() throws IOException {
+        this.writeConsumerProject(UnifycodeGradlePluginFunctionalTest.JAVA_AND_UNIFYCODE, "");
+        this.runAndFail(UnifycodeGradlePluginFunctionalTest.CHECKSTYLE_MAIN_TASK);
+        this.assertCheckstyleMainReportContains(
+            UnifycodeGradlePluginFunctionalTest.MISSING_JAVADOC_TYPE,
+            "Expected strict Checkstyle to write violation details."
+        );
+    }
+
+    @Test
+    void nonStrictPmdReportsViolationsWithoutFailingBuild() throws IOException {
+        this.writeConsumerProject(
+            UnifycodeGradlePluginFunctionalTest.JAVA_AND_UNIFYCODE,
+            "unifycode {\n"
+                + "    pmd {\n"
+                + UnifycodeGradlePluginFunctionalTest.STRICT_FALSE
+                + UnifycodeGradlePluginFunctionalTest.INDENTED_BLOCK_END
+                + UnifycodeGradlePluginFunctionalTest.BLOCK_END
+                + "\n"
+        );
+        this.writePmdViolatingSource();
+        this.run(UnifycodeGradlePluginFunctionalTest.PMD_MAIN_TASK);
+        this.assertPmdReportContains(
+            "ProhibitPublicStaticMethods",
+            "Expected non-strict PMD to write violation details."
+        );
+    }
+
+    @Test
+    void strictPmdFailsBuildOnViolations() throws IOException {
+        this.writeConsumerProject(UnifycodeGradlePluginFunctionalTest.JAVA_AND_UNIFYCODE, "");
+        this.writePmdViolatingSource();
+        this.runAndFail(UnifycodeGradlePluginFunctionalTest.PMD_MAIN_TASK);
+        this.assertPmdReportContains("ProhibitPublicStaticMethods", "Expected strict PMD to write violation details.");
+    }
+
+    @Test
+    void strictnessConfiguredBeforeJavaPluginIsHonored() throws IOException {
+        this.writeConsumerProject(
+            UnifycodeGradlePluginFunctionalTest.UNIFYCODE_ONLY,
+            "unifycode {\n"
+                + "    checkstyle {\n"
+                + UnifycodeGradlePluginFunctionalTest.STRICT_FALSE
+                + UnifycodeGradlePluginFunctionalTest.INDENTED_BLOCK_END
+                + "    pmd {\n"
+                + UnifycodeGradlePluginFunctionalTest.STRICT_FALSE
+                + UnifycodeGradlePluginFunctionalTest.INDENTED_BLOCK_END
+                + UnifycodeGradlePluginFunctionalTest.BLOCK_END
+                + "\n"
+                + "apply plugin: 'java'\n"
+        );
+        this.writePmdViolatingSource();
+        this.run(UnifycodeGradlePluginFunctionalTest.CHECKSTYLE_MAIN_TASK);
+        this.run(UnifycodeGradlePluginFunctionalTest.PMD_MAIN_TASK);
+        this.assertCheckstyleMainReportContains(
+            UnifycodeGradlePluginFunctionalTest.MISSING_JAVADOC_TYPE,
+            "Expected Checkstyle policy configured before Java to be honored."
+        );
+        this.assertPmdReportContains(
+            "ProhibitPublicStaticMethods",
+            "Expected PMD policy configured before Java to be honored."
+        );
+    }
+
     private BuildResult run(final String... arguments) {
         return GradleRunner.create()
             .withProjectDir(this.testProjectDir.toFile())
@@ -243,6 +337,19 @@ final class UnifycodeGradlePluginFunctionalTest {
                 + " * Test package.\n"
                 + " */\n"
                 + UnifycodeGradlePluginFunctionalTest.DEMO_PACKAGE
+        );
+    }
+
+    private void writePmdViolatingSource() throws IOException {
+        this.writeFile(
+            "src/main/java/demo/App.java",
+            UnifycodeGradlePluginFunctionalTest.DEMO_PACKAGE
+                + "\n"
+                + "public final class App {\n"
+                + "    public static int violation() {\n"
+                + "        return 1;\n"
+                + UnifycodeGradlePluginFunctionalTest.METHOD_END
+                + UnifycodeGradlePluginFunctionalTest.BLOCK_END
         );
     }
 
@@ -296,6 +403,20 @@ final class UnifycodeGradlePluginFunctionalTest {
     private void assertCheckstyleReportContains(final String fragment, final String message) throws IOException {
         Assertions.assertTrue(
             Files.readString(this.testProjectDir.resolve("build/reports/checkstyle/test.xml")).contains(fragment),
+            message
+        );
+    }
+
+    private void assertCheckstyleMainReportContains(final String fragment, final String message) throws IOException {
+        Assertions.assertTrue(
+            Files.readString(this.testProjectDir.resolve("build/reports/checkstyle/main.xml")).contains(fragment),
+            message
+        );
+    }
+
+    private void assertPmdReportContains(final String fragment, final String message) throws IOException {
+        Assertions.assertTrue(
+            Files.readString(this.testProjectDir.resolve("build/reports/pmd/main.xml")).contains(fragment),
             message
         );
     }
