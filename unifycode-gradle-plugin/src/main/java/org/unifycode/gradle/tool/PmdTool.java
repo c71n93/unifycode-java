@@ -4,7 +4,8 @@ import java.io.File;
 import java.util.Collections;
 import org.gradle.api.Project;
 import org.gradle.api.plugins.quality.PmdExtension;
-import org.unifycode.gradle.QualityToolPolicy;
+import org.unifycode.gradle.extension.QualityToolPolicy;
+import org.unifycode.gradle.extension.UnifycodeExtension;
 
 /**
  * PMD configuration tool.
@@ -64,7 +65,7 @@ public final class PmdTool {
         this(
             project,
             new UnifycodeResources(project),
-            project.getExtensions().getByType(org.unifycode.gradle.UnifycodeExtension.class).getPmd()
+            project.getExtensions().getByType(UnifycodeExtension.class).getPmd()
         );
     }
 

@@ -3,7 +3,8 @@ package org.unifycode.gradle.tool;
 import java.io.File;
 import org.gradle.api.Project;
 import org.gradle.api.plugins.quality.CheckstyleExtension;
-import org.unifycode.gradle.QualityToolPolicy;
+import org.unifycode.gradle.extension.QualityToolPolicy;
+import org.unifycode.gradle.extension.UnifycodeExtension;
 
 /**
  * Checkstyle configuration tool.
@@ -69,7 +70,7 @@ public final class CheckstyleTool {
         this(
             project,
             new UnifycodeResources(project),
-            project.getExtensions().getByType(org.unifycode.gradle.UnifycodeExtension.class).getCheckstyle()
+            project.getExtensions().getByType(UnifycodeExtension.class).getCheckstyle()
         );
     }
 

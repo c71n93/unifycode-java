@@ -1,4 +1,4 @@
-package org.unifycode.gradle;
+package org.unifycode.gradle.extension;
 
 import javax.inject.Inject;
 import org.gradle.api.Action;

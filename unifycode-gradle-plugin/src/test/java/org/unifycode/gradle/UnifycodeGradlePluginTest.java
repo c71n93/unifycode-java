@@ -13,6 +13,7 @@ import org.gradle.api.plugins.quality.PmdExtension;
 import org.gradle.testfixtures.ProjectBuilder;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.unifycode.gradle.extension.UnifycodeExtension;
 
 /**
  * Unit tests for the UnifyCode Gradle plugin.
