@@ -27,13 +27,11 @@ final class UnifycodeGradlePluginTest {
     private static final String UNIFYCODE_CHECK = "unifycodeCheck";
 
     @Test
-    void applyCreatesExtensionWithEnabledDefaults() {
+    void applyCreatesExtension() {
         final Project project = ProjectBuilder.builder().build();
         new UnifycodeGradlePlugin().apply(project);
         final UnifycodeExtension extension = project.getExtensions().getByType(UnifycodeExtension.class);
-        Assertions.assertTrue(extension.getCheckstyleEnabled().get(), "Expected Checkstyle to be enabled by default.");
-        Assertions.assertTrue(extension.getPmdEnabled().get(), "Expected PMD to be enabled by default.");
-        Assertions.assertTrue(extension.getSpotlessEnabled().get(), "Expected Spotless to be enabled by default.");
+        Assertions.assertNotNull(extension, "Expected unifycode extension to exist.");
     }
 
     @Test
@@ -133,37 +131,6 @@ final class UnifycodeGradlePluginTest {
             Files.exists(unifycode.resolve("eclipse-java-formatter.xml")),
             "Expected eclipse-java-formatter.xml to be copied."
         );
-    }
-
-    @Test
-    void disabledToolsLeaveHelperTasksAsNoOp() {
-        final Project project = ProjectBuilder.builder().build();
-        new UnifycodeGradlePlugin().apply(project);
-        final UnifycodeExtension extension = project.getExtensions().getByType(UnifycodeExtension.class);
-        extension.getCheckstyleEnabled().set(false);
-        extension.getPmdEnabled().set(false);
-        extension.getSpotlessEnabled().set(false);
-        project.getPluginManager().apply("java");
-        this.evaluate(project);
-        Assertions.assertNull(
-            project.getPlugins().findPlugin("checkstyle"),
-            "Expected Checkstyle plugin not to be applied."
-        );
-        Assertions.assertNull(project.getPlugins().findPlugin("pmd"), "Expected PMD plugin not to be applied.");
-        Assertions.assertNull(
-            project.getPlugins().findPlugin("com.diffplug.spotless"),
-            "Expected Spotless plugin not to be applied."
-        );
-        Assertions.assertTrue(
-            this.dependencies(this.task(project, UnifycodeGradlePluginTest.FORMAT)).isEmpty(),
-            "Expected unifycodeFormat task to have no dependencies."
-        );
-        Assertions.assertTrue(
-            this.dependencies(this.task(project, UnifycodeGradlePluginTest.UNIFYCODE_CHECK)).isEmpty(),
-            "Expected unifycodeCheck task to have no dependencies."
-        );
-        final Path unifycode = project.getLayout().getBuildDirectory().getAsFile().get().toPath().resolve("unifycode");
-        Assertions.assertFalse(Files.exists(unifycode), "Expected no unifycode config files to be copied.");
     }
 
     private Task task(final Project project, final String name) {

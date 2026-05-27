@@ -6,7 +6,6 @@ import org.gradle.api.Task;
 import org.gradle.api.plugins.quality.Checkstyle;
 import org.gradle.api.plugins.quality.Pmd;
 import org.gradle.api.tasks.TaskContainer;
-import org.unifycode.gradle.UnifycodeExtension;
 
 /**
  * UnifyCode helper task registration.
@@ -18,19 +17,12 @@ public final class UnifycodeTasks {
     private final TaskContainer tasks;
 
     /**
-     * Plugin extension.
-     */
-    private final UnifycodeExtension extension;
-
-    /**
      * New helper task registration.
      *
      * @param tasks gradle task container.
-     * @param extension plugin extension.
      */
-    public UnifycodeTasks(final TaskContainer tasks, final UnifycodeExtension extension) {
+    public UnifycodeTasks(final TaskContainer tasks) {
         this.tasks = tasks;
-        this.extension = extension;
     }
 
     /**
@@ -54,37 +46,26 @@ public final class UnifycodeTasks {
     }
 
     private Iterable<? extends Task> spotlessApplyTasks() {
-        return this.taskNamedWhenEnabled("spotlessApply", this.extension.getSpotlessEnabled().get());
+        return this.taskNamed("spotlessApply");
     }
 
     private Iterable<? extends Task> spotlessCheckTasks() {
-        return this.taskNamedWhenEnabled("spotlessCheck", this.extension.getSpotlessEnabled().get());
+        return this.taskNamed("spotlessCheck");
     }
 
     private Iterable<? extends Task> checkstyleTasks() {
-        return this.tasksTypedWhenEnabled(Checkstyle.class, this.extension.getCheckstyleEnabled().get());
+        return this.tasks.withType(Checkstyle.class);
     }
 
     private Iterable<? extends Task> pmdTasks() {
-        return this.tasksTypedWhenEnabled(Pmd.class, this.extension.getPmdEnabled().get());
+        return this.tasks.withType(Pmd.class);
     }
 
-    // @checkstyle ReturnCount (8 lines)
-    private Iterable<? extends Task> taskNamedWhenEnabled(final String name, final boolean enabled) {
-        if (!enabled) {
-            return Collections.emptyList();
-        }
+    private Iterable<? extends Task> taskNamed(final String name) {
         final Task task = this.tasks.findByName(name);
         if (task == null) {
             return Collections.emptyList();
         }
         return Collections.singletonList(task);
-    }
-
-    private <T extends Task> Iterable<T> tasksTypedWhenEnabled(final Class<T> type, final boolean enabled) {
-        if (!enabled) {
-            return Collections.emptyList();
-        }
-        return this.tasks.withType(type);
     }
 }
