@@ -21,9 +21,9 @@ public final class CheckstyleTool {
     private static final String SUPPRESSIONS = "unifycode/checkstyle/checkstyle-suppressions.xml";
 
     /**
-     * Current project.
+     * Project facade.
      */
-    private final Project project;
+    private final ToolProject project;
 
     /**
      * Resource copier.
@@ -38,27 +38,17 @@ public final class CheckstyleTool {
     /**
      * New tool configured with an explicit resource copier.
      *
-     * @param project current project.
+     * @param project project facade.
      * @param resources resource copier.
      * @param policy checkstyle policy.
      */
     public CheckstyleTool(
-                          final Project project,
+                          final ToolProject project,
                           final UnifycodeResources resources,
                           final QualityToolPolicy policy) {
         this.project = project;
         this.resources = resources;
         this.policy = policy;
-    }
-
-    /**
-     * New tool configured with an explicit policy.
-     *
-     * @param project current project.
-     * @param policy checkstyle policy.
-     */
-    public CheckstyleTool(final Project project, final QualityToolPolicy policy) {
-        this(project, new UnifycodeResources(project), policy);
     }
 
     /**
@@ -68,7 +58,7 @@ public final class CheckstyleTool {
      */
     public CheckstyleTool(final Project project) {
         this(
-            project,
+            new ToolProject(project),
             new UnifycodeResources(project),
             project.getExtensions().getByType(UnifycodeExtension.class).getCheckstyle()
         );
@@ -78,11 +68,11 @@ public final class CheckstyleTool {
      * Applies Checkstyle and configures its ruleset.
      */
     public void configure() {
-        this.project.getPluginManager().apply("checkstyle");
+        this.project.applyPlugin("checkstyle");
         final File config = this.resources.copy(CheckstyleTool.RESOURCE);
         final File suppressions = this.resources.copy(CheckstyleTool.SUPPRESSIONS);
         // @todo #2:30min Pin Checkstyle toolVersion to an up-to-date release instead of relying on Gradle defaults.
-        this.project.getExtensions().configure(CheckstyleExtension.class, extension -> {
+        this.project.configureExtension(CheckstyleExtension.class, extension -> {
             extension.setConfigFile(config);
             extension.setIgnoreFailures(this.policy.ignoresFailures());
             extension.getConfigProperties().put("unifycode.checkstyle.suppressions", suppressions.getAbsolutePath());

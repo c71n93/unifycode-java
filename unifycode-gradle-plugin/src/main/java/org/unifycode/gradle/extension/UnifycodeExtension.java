@@ -65,5 +65,4 @@ public class UnifycodeExtension {
     public void pmd(final Action<? super QualityToolPolicy> action) {
         action.execute(this.pmd);
     }
-
 }

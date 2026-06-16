@@ -17,11 +17,9 @@ public final class PmdTool {
     private static final String RESOURCE = "unifycode/pmd/pmd.xml";
 
     /**
-     * Current project.
-     *
-     * @todo #2:30min Store narrower object here instead of Project. Also related to CheckstyleTool and SpotlessTool.
+     * Project facade.
      */
-    private final Project project;
+    private final ToolProject project;
 
     /**
      * Resource copier.
@@ -36,24 +34,17 @@ public final class PmdTool {
     /**
      * New tool configured with an explicit resource copier.
      *
-     * @param project current project.
+     * @param project project facade.
      * @param resources resource copier.
      * @param policy tool policy.
      */
-    public PmdTool(final Project project, final UnifycodeResources resources, final QualityToolPolicy policy) {
+    public PmdTool(
+                   final ToolProject project,
+                   final UnifycodeResources resources,
+                   final QualityToolPolicy policy) {
         this.project = project;
         this.resources = resources;
         this.policy = policy;
-    }
-
-    /**
-     * New tool configured with an explicit policy.
-     *
-     * @param project current project.
-     * @param policy tool policy.
-     */
-    public PmdTool(final Project project, final QualityToolPolicy policy) {
-        this(project, new UnifycodeResources(project), policy);
     }
 
     /**
@@ -63,7 +54,7 @@ public final class PmdTool {
      */
     public PmdTool(final Project project) {
         this(
-            project,
+            new ToolProject(project),
             new UnifycodeResources(project),
             project.getExtensions().getByType(UnifycodeExtension.class).getPmd()
         );
@@ -73,10 +64,10 @@ public final class PmdTool {
      * Applies PMD and configures its ruleset.
      */
     public void configure() {
-        this.project.getPluginManager().apply("pmd");
+        this.project.applyPlugin("pmd");
         final File config = this.resources.copy(PmdTool.RESOURCE);
-        this.project.getExtensions().configure(PmdExtension.class, extension -> {
-            // Keep the PMD version explicit here until tool versions are centralized.
+        this.project.configureExtension(PmdExtension.class, extension -> {
+            // @todo #2:40min Make all tool versions configurable from one place. For example from UnifycodeExtension class.
             extension.setToolVersion("7.0.0");
             extension.setConsoleOutput(true);
             extension.setIgnoreFailures(this.policy.ignoresFailures());
