@@ -67,7 +67,8 @@ public final class PmdTool {
         this.project.applyPlugin("pmd");
         final File config = this.resources.copy(PmdTool.RESOURCE);
         this.project.configureExtension(PmdExtension.class, extension -> {
-            // @todo #2:40min Make all tool versions configurable from one place. For example from UnifycodeExtension class.
+            // @todo #2:40min Make all tool versions configurable from one place. For example from UnifycodeExtension
+            // class.
             extension.setToolVersion("7.0.0");
             extension.setConsoleOutput(true);
             extension.setIgnoreFailures(this.policy.ignoresFailures());

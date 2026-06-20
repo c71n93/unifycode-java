@@ -1,0 +1,60 @@
+name: build
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  quality:
+    timeout-minutes: 15
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - uses: gradle/actions/setup-gradle@v4
+
+      - name: Run static analysis
+        run: ./gradlew unifycodeCheck
+
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: static-analysis-reports
+          path: |
+            **/build/reports/checkstyle/
+            **/build/reports/pmd/
+            **/build/reports/spotless/
+
+  tests:
+    timeout-minutes: 15
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - uses: gradle/actions/setup-gradle@v4
+
+      # Do not use ./gradlew check here: check already depends on unifycodeCheck in this build.
+      - name: Run tests and plugin validation
+        run: ./gradlew test :unifycode-gradle-plugin:functionalTest :unifycode-gradle-plugin:validatePlugins
+
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: gradle-test-reports
+          path: |
+            **/build/reports/tests/
+            **/build/test-results/
