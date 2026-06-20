@@ -142,29 +142,30 @@ final class UnifycodeGradlePluginFunctionalTest {
     @Test
     void pluginStaysDormantForNonJavaProject() throws IOException {
         this.writeConsumerProject(UnifycodeGradlePluginFunctionalTest.UNIFYCODE_ONLY, "");
-        final BuildResult format = this.run(
-            UnifycodeGradlePluginFunctionalTest.FORMAT,
-            UnifycodeGradlePluginFunctionalTest.DRY_RUN
-        );
-        final BuildResult check = this.run(
-            UnifycodeGradlePluginFunctionalTest.UNIFYCODE_CHECK,
-            UnifycodeGradlePluginFunctionalTest.DRY_RUN
-        );
-        this.assertContains(format, ":unifycodeFormat SKIPPED", "Expected unifycodeFormat task to exist.");
-        this.assertContains(check, ":unifycodeCheck SKIPPED", "Expected unifycodeCheck task to exist.");
+        final BuildResult result = this.run("tasks", "--all");
         this.assertNotContains(
-            format,
+            result,
+            UnifycodeGradlePluginFunctionalTest.FORMAT,
+            "Expected no unifycodeFormat task."
+        );
+        this.assertNotContains(
+            result,
+            UnifycodeGradlePluginFunctionalTest.UNIFYCODE_CHECK,
+            "Expected no unifycodeCheck task."
+        );
+        this.assertNotContains(
+            result,
             UnifycodeGradlePluginFunctionalTest.SPOTLESS_APPLY,
             "Expected no Spotless apply task."
         );
         this.assertNotContains(
-            check,
+            result,
             UnifycodeGradlePluginFunctionalTest.SPOTLESS_CHECK,
             "Expected no Spotless check task."
         );
-        this.assertNotContains(check, UnifycodeGradlePluginFunctionalTest.PMD_MAIN, "Expected no PMD task.");
+        this.assertNotContains(result, UnifycodeGradlePluginFunctionalTest.PMD_MAIN, "Expected no PMD task.");
         this.assertNotContains(
-            check,
+            result,
             UnifycodeGradlePluginFunctionalTest.CHECKSTYLE_MAIN,
             "Expected no Checkstyle task."
         );

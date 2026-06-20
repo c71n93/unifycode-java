@@ -29,6 +29,11 @@ final class UnifycodeGradlePluginTest {
      */
     private static final String UNIFYCODE_CHECK = "unifycodeCheck";
 
+    /**
+     * Java Gradle plugin id.
+     */
+    private static final String JAVA_PLUGIN = "java";
+
     @Test
     void applyCreatesExtension() {
         final Project project = ProjectBuilder.builder().build();
@@ -50,17 +55,16 @@ final class UnifycodeGradlePluginTest {
     }
 
     @Test
-    void applyRegistersHelperTasksForNonJavaProject() {
+    void applyDoesNotRegisterHelperTasksForNonJavaProject() {
         final Project project = ProjectBuilder.builder().build();
         new UnifycodeGradlePlugin().apply(project);
-        Assertions
-            .assertNotNull(
-                this.task(project, UnifycodeGradlePluginTest.FORMAT),
-                "Expected unifycodeFormat task to exist."
-            );
-        Assertions.assertNotNull(
-            this.task(project, UnifycodeGradlePluginTest.UNIFYCODE_CHECK),
-            "Expected unifycodeCheck task to exist."
+        Assertions.assertNull(
+            project.getTasks().findByName(UnifycodeGradlePluginTest.FORMAT),
+            "Expected unifycodeFormat task not to exist."
+        );
+        Assertions.assertNull(
+            project.getTasks().findByName(UnifycodeGradlePluginTest.UNIFYCODE_CHECK),
+            "Expected unifycodeCheck task not to exist."
         );
         Assertions.assertNull(
             project.getPlugins().findPlugin("checkstyle"),
@@ -76,6 +80,7 @@ final class UnifycodeGradlePluginTest {
     @Test
     void applyFailsWhenProjectAlreadyDefinesHelperTask() {
         final Project project = ProjectBuilder.builder().build();
+        project.getPluginManager().apply(UnifycodeGradlePluginTest.JAVA_PLUGIN);
         project.getTasks().register(UnifycodeGradlePluginTest.FORMAT);
         final InvalidUserDataException exception = Assertions.assertThrows(
             InvalidUserDataException.class,
@@ -91,7 +96,7 @@ final class UnifycodeGradlePluginTest {
     void applyBeforeJavaConfiguresToolsAfterEvaluation() {
         final Project project = ProjectBuilder.builder().build();
         new UnifycodeGradlePlugin().apply(project);
-        project.getPluginManager().apply("java");
+        project.getPluginManager().apply(UnifycodeGradlePluginTest.JAVA_PLUGIN);
         this.evaluate(project);
         Assertions.assertNotNull(
             project.getPlugins().findPlugin("checkstyle"),
@@ -133,7 +138,7 @@ final class UnifycodeGradlePluginTest {
         final UnifycodeExtension extension = project.getExtensions().getByType(UnifycodeExtension.class);
         extension.checkstyle(policy -> policy.getStrict().set(false));
         extension.pmd(policy -> policy.getStrict().set(false));
-        project.getPluginManager().apply("java");
+        project.getPluginManager().apply(UnifycodeGradlePluginTest.JAVA_PLUGIN);
         this.evaluate(project);
         Assertions.assertTrue(
             project.getExtensions().getByType(CheckstyleExtension.class).isIgnoreFailures(),
@@ -148,7 +153,7 @@ final class UnifycodeGradlePluginTest {
     @Test
     void applyCopiesExpectedConfigFilesForJavaProject() {
         final Project project = ProjectBuilder.builder().build();
-        project.getPluginManager().apply("java");
+        project.getPluginManager().apply(UnifycodeGradlePluginTest.JAVA_PLUGIN);
         new UnifycodeGradlePlugin().apply(project);
         this.evaluate(project);
         final Path unifycode = project.getLayout().getBuildDirectory().getAsFile().get().toPath().resolve("unifycode");

@@ -18,12 +18,14 @@ public final class UnifycodeGradlePlugin implements Plugin<Project> {
             "unifycode",
             UnifycodeExtension.class
         );
-        new UnifycodeTasks(project.getTasks()).configure();
-        project.getPluginManager().withPlugin("java-base", plugin -> project.afterEvaluate(ignored -> {
-            new CheckstyleTool(project).configure();
-            new PmdTool(project).configure();
-            new SpotlessTool(project).configure();
-            project.getTasks().named("check").configure(task -> task.dependsOn("unifycodeCheck"));
-        }));
+        project.getPluginManager().withPlugin("java-base", plugin -> {
+            new UnifycodeTasks(project.getTasks()).configure();
+            project.afterEvaluate(ignored -> {
+                new CheckstyleTool(project).configure();
+                new PmdTool(project).configure();
+                new SpotlessTool(project).configure();
+                project.getTasks().named("check").configure(task -> task.dependsOn("unifycodeCheck"));
+            });
+        });
     }
 }
