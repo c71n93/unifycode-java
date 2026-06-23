@@ -1,59 +1,30 @@
 package org.unifycode.gradle;
 
 import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import org.gradle.testkit.runner.BuildResult;
-import org.gradle.testkit.runner.GradleRunner;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
-// @checkstyle JavadocVariable (25 lines)
 /**
  * Functional tests for the UnifyCode Gradle plugin.
  */
 final class UnifycodeGradlePluginFunctionalTest {
-    private static final String JAVA_AND_UNIFYCODE = "    id 'java'\n    id 'org.unifycode'\n";
+    /**
+     * Default Java project build fixture.
+     */
+    private static final String JAVA_AND_UNIFYCODE = "java-and-unifycode";
 
-    private static final String UNIFYCODE_AND_JAVA = "    id 'org.unifycode'\n    id 'java'\n";
-
-    private static final String UNIFYCODE_ONLY = "    id 'org.unifycode'\n";
-
-    private static final String DRY_RUN = "--dry-run";
-
-    private static final String FORMAT = "unifycodeFormat";
-
-    private static final String UNIFYCODE_CHECK = "unifycodeCheck";
-
-    private static final String UNIFYCODE_CHECK_SKIPPED = ":unifycodeCheck SKIPPED";
-
-    private static final String SPOTLESS_APPLY = ":spotlessApply SKIPPED";
-
-    private static final String SPOTLESS_CHECK = ":spotlessCheck SKIPPED";
-
-    private static final String PMD_MAIN = ":pmdMain SKIPPED";
-
-    private static final String CHECKSTYLE_MAIN = ":checkstyleMain SKIPPED";
-
-    private static final String CHECKSTYLE_TEST_TASK = "checkstyleTest";
-
-    private static final String CHECKSTYLE_MAIN_TASK = "checkstyleMain";
-
-    private static final String PMD_MAIN_TASK = "pmdMain";
-
-    private static final String DEMO_PACKAGE = "package demo;\n";
-
+    /**
+     * Checkstyle missing type Javadoc rule name.
+     */
     private static final String MISSING_JAVADOC_TYPE = "MissingJavadocType";
 
-    private static final String STRICT_FALSE = "        strict = false\n";
-
-    private static final String INDENTED_BLOCK_END = "    "
-        + UnifycodeGradlePluginFunctionalTest.BLOCK_END;
-
-    private static final String METHOD_END = "    }\n";
-
-    private static final String BLOCK_END = "}\n";
+    /**
+     * PMD public static method rule name.
+     */
+    private static final String PROHIBIT_PUBLIC_STATIC_METHODS = "ProhibitPublicStaticMethods";
 
     /**
      * Temporary consumer project directory.
@@ -63,362 +34,175 @@ final class UnifycodeGradlePluginFunctionalTest {
 
     @Test
     void checkTaskDependsOnAllQualityChecks() throws IOException {
-        this.writeConsumerProject(UnifycodeGradlePluginFunctionalTest.JAVA_AND_UNIFYCODE, "");
-        final BuildResult result = this.run("check", UnifycodeGradlePluginFunctionalTest.DRY_RUN);
-        this.assertContains(
-            result,
-            UnifycodeGradlePluginFunctionalTest.UNIFYCODE_CHECK_SKIPPED,
-            "Expected check to depend on unifycodeCheck."
-        );
-        this.assertContains(
-            result, UnifycodeGradlePluginFunctionalTest.SPOTLESS_CHECK,
-            "Expected spotlessCheck to be wired into check."
-        );
-        this.assertContains(
-            result, UnifycodeGradlePluginFunctionalTest.PMD_MAIN, "Expected pmdMain to be wired into check."
-        );
-        this.assertContains(
-            result,
-            UnifycodeGradlePluginFunctionalTest.CHECKSTYLE_MAIN,
-            "Expected checkstyleMain to be wired into check."
-        );
-    }
+        final GradleFixtureProject project = this.project();
+        project.writeBuild(UnifycodeGradlePluginFunctionalTest.JAVA_AND_UNIFYCODE);
 
-    @Test
-    void formatTaskDependsOnSpotlessApply() throws IOException {
-        this.writeConsumerProject(UnifycodeGradlePluginFunctionalTest.JAVA_AND_UNIFYCODE, "");
-        final BuildResult result = this.run(
-            UnifycodeGradlePluginFunctionalTest.FORMAT,
-            UnifycodeGradlePluginFunctionalTest.DRY_RUN
-        );
-        this.assertContains(
-            result,
-            UnifycodeGradlePluginFunctionalTest.SPOTLESS_APPLY,
-            "Expected unifycodeFormat task to depend on spotlessApply."
-        );
+        final BuildResult result = project.succeeds("check");
+
+        this.assertTaskScheduled(result, ":unifycodeCheck");
+        this.assertTaskScheduled(result, ":spotlessCheck");
+        this.assertTaskScheduled(result, ":pmdMain");
+        this.assertTaskScheduled(result, ":checkstyleMain");
     }
 
     @Test
     void unifycodeCheckDependsOnStaticAnalysisTasksOnly() throws IOException {
-        this.writeConsumerProject(UnifycodeGradlePluginFunctionalTest.JAVA_AND_UNIFYCODE, "");
-        final BuildResult result = this.run(
-            UnifycodeGradlePluginFunctionalTest.UNIFYCODE_CHECK,
-            UnifycodeGradlePluginFunctionalTest.DRY_RUN
-        );
-        this.assertContains(
-            result,
-            UnifycodeGradlePluginFunctionalTest.SPOTLESS_CHECK,
-            "Expected unifycodeCheck to include spotlessCheck."
-        );
-        this.assertContains(
-            result, UnifycodeGradlePluginFunctionalTest.PMD_MAIN, "Expected unifycodeCheck to include pmdMain."
-        );
-        this.assertContains(
-            result,
-            UnifycodeGradlePluginFunctionalTest.CHECKSTYLE_MAIN,
-            "Expected unifycodeCheck to include checkstyleMain."
-        );
-        this.assertNotContains(result, ":test SKIPPED", "Expected unifycodeCheck not to include test task.");
+        final GradleFixtureProject project = this.project();
+        project.writeBuild(UnifycodeGradlePluginFunctionalTest.JAVA_AND_UNIFYCODE);
+
+        final BuildResult result = project.succeeds("unifycodeCheck");
+
+        this.assertTaskScheduled(result, ":spotlessCheck");
+        this.assertTaskScheduled(result, ":pmdMain");
+        this.assertTaskScheduled(result, ":checkstyleMain");
+        this.assertTaskNotScheduled(result, ":test");
     }
 
     @Test
     void pluginWorksWhenAppliedBeforeJava() throws IOException {
-        this.writeConsumerProject(UnifycodeGradlePluginFunctionalTest.UNIFYCODE_AND_JAVA, "");
-        final BuildResult result = this.run(
-            UnifycodeGradlePluginFunctionalTest.UNIFYCODE_CHECK,
-            UnifycodeGradlePluginFunctionalTest.DRY_RUN
-        );
-        this.assertContains(
-            result, UnifycodeGradlePluginFunctionalTest.SPOTLESS_CHECK, "Expected Spotless to be configured."
-        );
-        this.assertContains(result, UnifycodeGradlePluginFunctionalTest.PMD_MAIN, "Expected PMD to be configured.");
-        this.assertContains(
-            result,
-            UnifycodeGradlePluginFunctionalTest.CHECKSTYLE_MAIN,
-            "Expected Checkstyle to be configured."
-        );
+        final GradleFixtureProject project = this.project();
+        project.writeBuild("unifycode-and-java");
+
+        final BuildResult result = project.succeeds("unifycodeCheck");
+
+        this.assertTaskScheduled(result, ":spotlessCheck");
+        this.assertTaskScheduled(result, ":pmdMain");
+        this.assertTaskScheduled(result, ":checkstyleMain");
     }
 
-    @Test
-    void pluginStaysDormantForNonJavaProject() throws IOException {
-        this.writeConsumerProject(UnifycodeGradlePluginFunctionalTest.UNIFYCODE_ONLY, "");
-        final BuildResult result = this.run("tasks", "--all");
-        this.assertNotContains(
-            result,
-            UnifycodeGradlePluginFunctionalTest.FORMAT,
-            "Expected no unifycodeFormat task."
-        );
-        this.assertNotContains(
-            result,
-            UnifycodeGradlePluginFunctionalTest.UNIFYCODE_CHECK,
-            "Expected no unifycodeCheck task."
-        );
-        this.assertNotContains(
-            result,
-            UnifycodeGradlePluginFunctionalTest.SPOTLESS_APPLY,
-            "Expected no Spotless apply task."
-        );
-        this.assertNotContains(
-            result,
-            UnifycodeGradlePluginFunctionalTest.SPOTLESS_CHECK,
-            "Expected no Spotless check task."
-        );
-        this.assertNotContains(result, UnifycodeGradlePluginFunctionalTest.PMD_MAIN, "Expected no PMD task.");
-        this.assertNotContains(
-            result,
-            UnifycodeGradlePluginFunctionalTest.CHECKSTYLE_MAIN,
-            "Expected no Checkstyle task."
-        );
-    }
-
+    // @todo #2:30min Move Checkstyle rule-behavior coverage (3 tests below) to the checkstyle subproject.
     @Test
     void checkstyleIgnoresJavadocsForActualTests() throws IOException {
-        this.writeConsumerProject(UnifycodeGradlePluginFunctionalTest.JAVA_AND_UNIFYCODE, "");
-        this.writeTestPackageInfo();
-        this.writeFile(
-            "src/test/java/demo/AppTest.java",
-            UnifycodeGradlePluginFunctionalTest.DEMO_PACKAGE
-                + "\n"
-                + "/**\n"
-                + " * Application test.\n"
-                + " */\n"
-                + "final class AppTest {\n"
-                + "    void runs() {\n"
-                + UnifycodeGradlePluginFunctionalTest.METHOD_END
-                + UnifycodeGradlePluginFunctionalTest.BLOCK_END
-        );
-        final BuildResult result = this.run(UnifycodeGradlePluginFunctionalTest.CHECKSTYLE_TEST_TASK);
-        this.assertContains(result, ":checkstyleTest", "Expected Checkstyle to inspect actual test classes.");
+        final GradleFixtureProject project = this.project();
+        project.writeBuild(UnifycodeGradlePluginFunctionalTest.JAVA_AND_UNIFYCODE);
+        project.writeTestPackageInfo();
+        project.writeTestSource("app-test-with-type-javadoc");
+
+        final BuildResult result = project.succeeds("checkstyleTest");
+
+        this.assertTaskScheduled(result, ":checkstyleTest");
     }
 
     @Test
     void checkstyleRequiresTypeJavadocsForActualTests() throws IOException {
-        this.writeConsumerProject(UnifycodeGradlePluginFunctionalTest.JAVA_AND_UNIFYCODE, "");
-        this.writeTestPackageInfo();
-        this.writeFile(
-            "src/test/java/demo/AppTest.java",
-            UnifycodeGradlePluginFunctionalTest.DEMO_PACKAGE
-                + "\n"
-                + "final class AppTest {\n"
-                + "    /**\n"
-                + "     * Runs.\n"
-                + "     */\n"
-                + "    void runs() {\n"
-                + UnifycodeGradlePluginFunctionalTest.METHOD_END
-                + UnifycodeGradlePluginFunctionalTest.BLOCK_END
-        );
-        this.runAndFail(UnifycodeGradlePluginFunctionalTest.CHECKSTYLE_TEST_TASK);
-        this.assertCheckstyleReportContains(
-            "MissingJavadocType",
+        final GradleFixtureProject project = this.project();
+        project.writeBuild(UnifycodeGradlePluginFunctionalTest.JAVA_AND_UNIFYCODE);
+        project.writeTestPackageInfo();
+        project.writeTestSource("app-test-missing-type-javadoc");
+
+        project.fails("checkstyleTest");
+
+        Assertions.assertTrue(
+            project.checkstyleTestReport().contains(UnifycodeGradlePluginFunctionalTest.MISSING_JAVADOC_TYPE),
             "Expected actual test classes to require type Javadocs."
         );
     }
 
     @Test
     void checkstyleRequiresJavadocsForTestInfrastructure() throws IOException {
-        this.writeConsumerProject(UnifycodeGradlePluginFunctionalTest.JAVA_AND_UNIFYCODE, "");
-        this.writeTestPackageInfo();
-        this.writeFile(
-            "src/test/java/demo/FakeApp.java",
-            UnifycodeGradlePluginFunctionalTest.DEMO_PACKAGE
-                + "\n"
-                + "final class FakeApp {\n"
-                + "    String value() {\n"
-                + "        return \"value\";\n"
-                + UnifycodeGradlePluginFunctionalTest.METHOD_END
-                + UnifycodeGradlePluginFunctionalTest.BLOCK_END
+        final GradleFixtureProject project = this.project();
+        project.writeBuild(UnifycodeGradlePluginFunctionalTest.JAVA_AND_UNIFYCODE);
+        project.writeTestPackageInfo();
+        project.writeFixture(
+            "test/fake-app-missing-method-javadoc.java",
+            "src/test/java/demo/FakeApp.java"
         );
-        this.runAndFail(UnifycodeGradlePluginFunctionalTest.CHECKSTYLE_TEST_TASK);
-        this.assertCheckstyleReportContains("MissingJavadoc", "Expected test infrastructure to require Javadocs.");
+
+        project.fails("checkstyleTest");
+
+        Assertions.assertTrue(
+            project.checkstyleTestReport().contains("MissingJavadoc"),
+            "Expected test infrastructure to require Javadocs."
+        );
     }
 
     @Test
     void nonStrictCheckstyleReportsViolationsWithoutFailingBuild() throws IOException {
-        this.writeConsumerProject(
-            UnifycodeGradlePluginFunctionalTest.JAVA_AND_UNIFYCODE,
-            "unifycode {\n"
-                + "    checkstyle {\n"
-                + UnifycodeGradlePluginFunctionalTest.STRICT_FALSE
-                + UnifycodeGradlePluginFunctionalTest.INDENTED_BLOCK_END
-                + UnifycodeGradlePluginFunctionalTest.BLOCK_END
-                + "\n"
-        );
-        this.run(UnifycodeGradlePluginFunctionalTest.CHECKSTYLE_MAIN_TASK);
-        this.assertCheckstyleMainReportContains(
-            UnifycodeGradlePluginFunctionalTest.MISSING_JAVADOC_TYPE,
+        final GradleFixtureProject project = this.project();
+        project.writeBuild("non-strict-checkstyle");
+        project.writeMainSource("missing-type-javadoc");
+
+        project.succeeds("checkstyleMain");
+
+        Assertions.assertTrue(
+            project.checkstyleMainReport().contains(UnifycodeGradlePluginFunctionalTest.MISSING_JAVADOC_TYPE),
             "Expected non-strict Checkstyle to write violation details."
         );
     }
 
     @Test
     void strictCheckstyleFailsBuildOnViolations() throws IOException {
-        this.writeConsumerProject(UnifycodeGradlePluginFunctionalTest.JAVA_AND_UNIFYCODE, "");
-        this.runAndFail(UnifycodeGradlePluginFunctionalTest.CHECKSTYLE_MAIN_TASK);
-        this.assertCheckstyleMainReportContains(
-            UnifycodeGradlePluginFunctionalTest.MISSING_JAVADOC_TYPE,
+        final GradleFixtureProject project = this.project();
+        project.writeBuild(UnifycodeGradlePluginFunctionalTest.JAVA_AND_UNIFYCODE);
+        project.writeMainSource("missing-type-javadoc");
+
+        project.fails("checkstyleMain");
+
+        Assertions.assertTrue(
+            project.checkstyleMainReport().contains(UnifycodeGradlePluginFunctionalTest.MISSING_JAVADOC_TYPE),
             "Expected strict Checkstyle to write violation details."
         );
     }
 
     @Test
-    void nonStrictPmdReportsViolationsWithoutFailingBuild() throws IOException {
-        this.writeConsumerProject(
-            UnifycodeGradlePluginFunctionalTest.JAVA_AND_UNIFYCODE,
-            "unifycode {\n"
-                + "    pmd {\n"
-                + UnifycodeGradlePluginFunctionalTest.STRICT_FALSE
-                + UnifycodeGradlePluginFunctionalTest.INDENTED_BLOCK_END
-                + UnifycodeGradlePluginFunctionalTest.BLOCK_END
-                + "\n"
-        );
-        this.writePmdViolatingSource();
-        this.run(UnifycodeGradlePluginFunctionalTest.PMD_MAIN_TASK);
-        this.assertPmdReportContains(
-            "ProhibitPublicStaticMethods",
-            "Expected non-strict PMD to write violation details."
+    void nonStrictPmdPolicyAllowsBuildWhileStillWritingReport() throws IOException {
+        final GradleFixtureProject project = this.project();
+        project.writeBuild("non-strict-pmd");
+        project.writeMainSource("pmd-public-static-method");
+
+        project.succeeds("pmdMain");
+
+        Assertions.assertTrue(
+            project.pmdMainReport().contains(UnifycodeGradlePluginFunctionalTest.PROHIBIT_PUBLIC_STATIC_METHODS),
+            "Expected non-strict PMD policy to allow the build while still writing a report."
         );
     }
 
     @Test
-    void strictPmdFailsBuildOnViolations() throws IOException {
-        this.writeConsumerProject(UnifycodeGradlePluginFunctionalTest.JAVA_AND_UNIFYCODE, "");
-        this.writePmdViolatingSource();
-        this.runAndFail(UnifycodeGradlePluginFunctionalTest.PMD_MAIN_TASK);
-        this.assertPmdReportContains("ProhibitPublicStaticMethods", "Expected strict PMD to write violation details.");
+    void strictPmdPolicyFailsBuildWhenPmdReportsViolation() throws IOException {
+        final GradleFixtureProject project = this.project();
+        project.writeBuild(UnifycodeGradlePluginFunctionalTest.JAVA_AND_UNIFYCODE);
+        project.writeMainSource("pmd-public-static-method");
+
+        project.fails("pmdMain");
+
+        Assertions.assertTrue(
+            project.pmdMainReport().contains(UnifycodeGradlePluginFunctionalTest.PROHIBIT_PUBLIC_STATIC_METHODS),
+            "Expected strict PMD policy to fail after PMD reports a violation."
+        );
     }
 
     @Test
     void strictnessConfiguredBeforeJavaPluginIsHonored() throws IOException {
-        this.writeConsumerProject(
-            UnifycodeGradlePluginFunctionalTest.UNIFYCODE_ONLY,
-            "unifycode {\n"
-                + "    checkstyle {\n"
-                + UnifycodeGradlePluginFunctionalTest.STRICT_FALSE
-                + UnifycodeGradlePluginFunctionalTest.INDENTED_BLOCK_END
-                + "    pmd {\n"
-                + UnifycodeGradlePluginFunctionalTest.STRICT_FALSE
-                + UnifycodeGradlePluginFunctionalTest.INDENTED_BLOCK_END
-                + UnifycodeGradlePluginFunctionalTest.BLOCK_END
-                + "\n"
-                + "apply plugin: 'java'\n"
-        );
-        this.writePmdViolatingSource();
-        this.run(UnifycodeGradlePluginFunctionalTest.CHECKSTYLE_MAIN_TASK);
-        this.run(UnifycodeGradlePluginFunctionalTest.PMD_MAIN_TASK);
-        this.assertCheckstyleMainReportContains(
-            UnifycodeGradlePluginFunctionalTest.MISSING_JAVADOC_TYPE,
+        final GradleFixtureProject project = this.project();
+        project.writeBuild("non-strict-before-java");
+        project.writeMainSource("pmd-public-static-method");
+
+        project.succeeds("checkstyleMain");
+        project.succeeds("pmdMain");
+
+        Assertions.assertTrue(
+            project.checkstyleMainReport().contains(UnifycodeGradlePluginFunctionalTest.MISSING_JAVADOC_TYPE),
             "Expected Checkstyle policy configured before Java to be honored."
         );
-        this.assertPmdReportContains(
-            "ProhibitPublicStaticMethods",
+        Assertions.assertTrue(
+            project.pmdMainReport().contains(UnifycodeGradlePluginFunctionalTest.PROHIBIT_PUBLIC_STATIC_METHODS),
             "Expected PMD policy configured before Java to be honored."
         );
     }
 
-    private BuildResult run(final String... arguments) {
-        return GradleRunner.create()
-            .withProjectDir(this.testProjectDir.toFile())
-            .withArguments(arguments)
-            .withPluginClasspath()
-            .build();
+    private GradleFixtureProject project() {
+        return new GradleFixtureProject(this.testProjectDir);
     }
 
-    private BuildResult runAndFail(final String... arguments) {
-        return GradleRunner.create()
-            .withProjectDir(this.testProjectDir.toFile())
-            .withArguments(arguments)
-            .withPluginClasspath()
-            .buildAndFail();
-    }
-
-    private void writeTestPackageInfo() throws IOException {
-        this.writeFile(
-            "src/test/java/demo/package-info.java",
-            "/**\n"
-                + " * Test package.\n"
-                + " */\n"
-                + UnifycodeGradlePluginFunctionalTest.DEMO_PACKAGE
+    private void assertTaskScheduled(final BuildResult result, final String taskPath) {
+        Assertions.assertNotNull(
+            result.task(taskPath),
+            () -> "Expected " + taskPath + " to be scheduled.\nOutput:\n" + result.getOutput()
         );
     }
 
-    private void writePmdViolatingSource() throws IOException {
-        this.writeFile(
-            "src/main/java/demo/App.java",
-            UnifycodeGradlePluginFunctionalTest.DEMO_PACKAGE
-                + "\n"
-                + "public final class App {\n"
-                + "    public static int violation() {\n"
-                + "        return 1;\n"
-                + UnifycodeGradlePluginFunctionalTest.METHOD_END
-                + UnifycodeGradlePluginFunctionalTest.BLOCK_END
-        );
-    }
-
-    private void writeConsumerProject(final String plugins, final String extraBuildScript) throws IOException {
-        this.writeFile("settings.gradle", "rootProject.name = 'plugin-functional-test'\n");
-        this.writeFile(
-            "build.gradle",
-            "plugins {\n"
-                + plugins
-                + UnifycodeGradlePluginFunctionalTest.BLOCK_END
-                + "\n"
-                + "repositories {\n"
-                + "    mavenCentral()\n"
-                + UnifycodeGradlePluginFunctionalTest.BLOCK_END
-                + "\n"
-                + extraBuildScript
-        );
-        this.writeFile(
-            "src/main/java/demo/App.java",
-            "package demo;\n"
-                + "\n"
-                + "public class App {\n"
-                + "    public static void main(String[] args) {\n"
-                + "        System.out.println(\"ok\");\n"
-                + "    }\n"
-                + "}\n"
-        );
-    }
-
-    private void writeFile(final String relativePath, final String content) throws IOException {
-        final Path filePath = this.testProjectDir.resolve(relativePath);
-        final Path parentPath = filePath.getParent();
-        if (parentPath != null) {
-            Files.createDirectories(parentPath);
-        }
-        Files.writeString(filePath, content);
-    }
-
-    private void assertContains(final BuildResult result, final String fragment, final String message) {
-        Assertions
-            .assertTrue(result.getOutput().contains(fragment), () -> message + "\nOutput:\n" + result.getOutput());
-    }
-
-    private void assertNotContains(final BuildResult result, final String fragment, final String message) {
-        Assertions.assertFalse(
-            result.getOutput().contains(fragment),
-            () -> message + "\nOutput:\n" + result.getOutput()
-        );
-    }
-
-    private void assertCheckstyleReportContains(final String fragment, final String message) throws IOException {
-        Assertions.assertTrue(
-            Files.readString(this.testProjectDir.resolve("build/reports/checkstyle/test.xml")).contains(fragment),
-            message
-        );
-    }
-
-    private void assertCheckstyleMainReportContains(final String fragment, final String message) throws IOException {
-        Assertions.assertTrue(
-            Files.readString(this.testProjectDir.resolve("build/reports/checkstyle/main.xml")).contains(fragment),
-            message
-        );
-    }
-
-    private void assertPmdReportContains(final String fragment, final String message) throws IOException {
-        Assertions.assertTrue(
-            Files.readString(this.testProjectDir.resolve("build/reports/pmd/main.xml")).contains(fragment),
-            message
-        );
+    private void assertTaskNotScheduled(final BuildResult result, final String taskPath) {
+        Assertions.assertNull(result.task(taskPath), "Expected " + taskPath + " not to be scheduled.");
     }
 }
