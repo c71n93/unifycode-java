@@ -38,7 +38,7 @@ final class GradleFixtureProject {
      */
     /* default */ void writeBuild(final String name) throws IOException {
         this.write("settings.gradle", "rootProject.name = 'plugin-functional-test'\n");
-        this.writeFixture("build/" + name + ".gradle", "build.gradle");
+        this.writeFixture("build-scripts/" + name + ".gradle", "build.gradle");
         this.writeDefaultMainSource();
     }
 

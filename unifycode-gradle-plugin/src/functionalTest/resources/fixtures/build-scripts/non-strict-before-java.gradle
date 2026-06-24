@@ -1,0 +1,18 @@
+plugins {
+    id 'org.unifycode'
+}
+
+repositories {
+    mavenCentral()
+}
+
+unifycode {
+    checkstyle {
+        strict = false
+    }
+    pmd {
+        strict = false
+    }
+}
+
+apply plugin: 'java'

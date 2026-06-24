@@ -1,0 +1,8 @@
+plugins {
+    id 'org.unifycode'
+    id 'java'
+}
+
+repositories {
+    mavenCentral()
+}
