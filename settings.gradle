@@ -6,8 +6,8 @@ pluginManagement {
     }
     resolutionStrategy {
         eachPlugin {
-            if (requested.id.id == 'org.unifycode') {
-                useModule("com.github.c71n93.unifycode-java:unifycode-gradle-plugin:${requested.version}")
+            if (requested.id.id == 'io.github.c71n93.unifycode') {
+                useModule("com.github.c71n93.unifycode-java:unifycode-java:${requested.version}")
             }
         }
     }

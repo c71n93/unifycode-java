@@ -8,7 +8,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
 /**
- * Unit tests for the UnifyCode resource copier.
+ * Unit tests for the Unifycode resource copier.
  */
 final class UnifycodeResourcesTest {
     /**

@@ -5,7 +5,7 @@ plugins {
     //  Make single config file with version of tools we use. Use theese versions across the project.
     id 'com.diffplug.spotless' version '8.4.0'
     // @todo #2:20min Replace the temporary commit-pin plugin version with a proper release process.
-    id 'org.unifycode' version 'e899268610' apply false
+    id 'io.github.c71n93.unifycode' version 'ffefae7c79' apply false
 }
 
 def useRemoteUnifycodePlugin = System.getenv('JITPACK') == null
@@ -16,7 +16,7 @@ group = 'io.github.c71n93'
 version = '0.1.0'
 
 if (useRemoteUnifycodePlugin) {
-    pluginManager.apply('org.unifycode')
+    pluginManager.apply('io.github.c71n93.unifycode')
 }
 
 java {

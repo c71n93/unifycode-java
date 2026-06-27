@@ -16,7 +16,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 /**
- * Unit tests for the UnifyCode Gradle plugin.
+ * Unit tests for the Unifycode Gradle plugin.
  */
 final class UnifycodeGradlePluginTest {
     /**

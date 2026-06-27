@@ -8,7 +8,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
 /**
- * Functional tests for the UnifyCode Gradle plugin.
+ * Functional tests for the Unifycode Gradle plugin.
  */
 final class UnifycodeGradlePluginFunctionalTest {
     /**

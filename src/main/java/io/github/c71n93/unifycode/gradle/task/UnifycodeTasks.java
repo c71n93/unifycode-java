@@ -8,7 +8,7 @@ import org.gradle.api.plugins.quality.Pmd;
 import org.gradle.api.tasks.TaskContainer;
 
 /**
- * UnifyCode helper task registration.
+ * Unifycode helper task registration.
  */
 public final class UnifycodeTasks {
     /**
