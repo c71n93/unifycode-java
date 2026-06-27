@@ -9,7 +9,7 @@ def useRemoteUnifycodePlugin = System.getenv('JITPACK') == null
 def junitVersion = '5.10.2'
 def functionalTest = sourceSets.create('functionalTest')
 
-group = 'c71n93'
+group = 'io.github.c71n93'
 version = '0.1.0-SNAPSHOT'
 
 if (useRemoteUnifycodePlugin) {
@@ -39,8 +39,8 @@ gradlePlugin {
 
     plugins {
         unifycodeJava {
-            id = 'org.unifycode'
-            implementationClass = 'org.unifycode.gradle.UnifycodeGradlePlugin'
+            id = 'io.github.c71n93.unifycode'
+            implementationClass = 'io.github.c71n93.unifycode.gradle.UnifycodeGradlePlugin'
         }
     }
 }

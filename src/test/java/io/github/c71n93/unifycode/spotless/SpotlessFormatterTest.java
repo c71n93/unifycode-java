@@ -1,0 +1,149 @@
+package io.github.c71n93.unifycode.spotless;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.Locale;
+import org.gradle.testkit.runner.GradleRunner;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+
+/**
+ * Formatter fixture tests for the UnifyCode Spotless assets.
+ */
+final class SpotlessFormatterTest {
+
+    @Test
+    void formatsDocumentation() throws IOException {
+        Assertions.assertDoesNotThrow(() -> this.fixture("Documentation"), "Documentation fixture should pass");
+    }
+
+    @Test
+    void formatsMethodDeclarations() throws IOException {
+        Assertions.assertDoesNotThrow(
+            () -> this.fixture("MethodDeclarations"),
+            "Method declarations fixture should pass"
+        );
+    }
+
+    @Test
+    void formatsMethodCalls() throws IOException {
+        Assertions.assertDoesNotThrow(() -> this.fixture("MethodCalls"), "Method calls fixture should pass");
+    }
+
+    @Test
+    void formatsAnnotations() throws IOException {
+        Assertions.assertDoesNotThrow(() -> this.fixture("Annotations"), "Annotations fixture should pass");
+    }
+
+    @Test
+    void formatsExpressions() throws IOException {
+        Assertions.assertDoesNotThrow(() -> this.fixture("Expressions"), "Expressions fixture should pass");
+    }
+
+    @Test
+    void formatsRecordCtorParameters() throws IOException {
+        Assertions.assertDoesNotThrow(
+            () -> this.fixture("RecordCtorParameters"),
+            "Record ctor parameters fixture should pass"
+        );
+    }
+
+    private void fixture(final String name) throws IOException {
+        final String input = this.resource("io/github/c71n93/unifycode/spotless/fixtures/" + name + "Input.java");
+        final String expected =
+            this.expectedResource("io/github/c71n93/unifycode/spotless/fixtures/" + name + "Expected.java");
+        final Path project = Files.createTempDirectory("spotless-" + name.toLowerCase(Locale.ROOT));
+        this.project(project, input);
+        final String output = this.afterSpotlessApply(project);
+        Assertions.assertFalse(output.equals(input), "Fixture must start badly formatted");
+        Assertions.assertEquals(expected, output, "Formatted output should match expected fixture");
+        this.project(project, expected);
+        this.gradle(project, "spotlessCheck");
+        Assertions.assertEquals(
+            expected,
+            this.afterSpotlessApply(project),
+            "Expected fixture should stay stable after Spotless run"
+        );
+    }
+
+    private void project(final Path project, final String source) throws IOException {
+        Files.writeString(
+            project.resolve("settings.gradle"),
+            "rootProject.name = 'spotless-fixture'\n",
+            StandardCharsets.UTF_8
+        );
+        Files.writeString(project.resolve("build.gradle"), this.buildScript(), StandardCharsets.UTF_8);
+        Files.writeString(
+            project.resolve("eclipse-java-formatter.xml"),
+            this.resource("/io/github/c71n93/unifycode/spotless/eclipse-java-formatter.xml"),
+            StandardCharsets.UTF_8
+        );
+        Files.createDirectories(project.resolve("src/main/java/fixture"));
+        Files.writeString(
+            project.resolve("src/main/java/fixture/Fixture.java"),
+            source,
+            StandardCharsets.UTF_8
+        );
+    }
+
+    private String buildScript() {
+        // @todo #16:45min Make this formatter fixture test independent from external plugin resolution.
+        // The temporary Gradle project applies `com.diffplug.spotless` by version, so a cold
+        // Gradle cache may need network access to resolve the Spotless plugin even though the
+        // fixture is meant to test only our bundled Eclipse formatter XML. Rework this test to
+        // use a local/plugin-under-test classpath or another deterministic formatter harness.
+        return String.join(
+            "\n",
+            "plugins {",
+            "    id 'java'",
+            "    id 'com.diffplug.spotless' version '8.4.0'",
+            "}",
+            "",
+            "repositories {",
+            "    mavenCentral()",
+            "}",
+            "",
+            "spotless {",
+            "    java {",
+            "        target 'src/main/java/**/*.java'",
+            "        eclipse().configFile('eclipse-java-formatter.xml')",
+            "    }",
+            "}",
+            ""
+        );
+    }
+
+    private String afterSpotlessApply(final Path project) throws IOException {
+        this.gradle(project, "spotlessApply");
+        return Files.readString(
+            project.resolve("src/main/java/fixture/Fixture.java"),
+            StandardCharsets.UTF_8
+        ).replace("\r\n", "\n");
+    }
+
+    private void gradle(final Path project, final String task) {
+        GradleRunner.create()
+            .withProjectDir(project.toFile())
+            .withArguments(task, "--stacktrace")
+            .forwardOutput()
+            .build();
+    }
+
+    private String resource(final String path) throws IOException {
+        final String normalized = path.startsWith("/") ? path.substring(1) : path;
+        final ClassLoader loader = Thread.currentThread().getContextClassLoader();
+        try (InputStream stream = loader.getResourceAsStream(normalized)) {
+            if (stream == null) {
+                throw new IOException("Missing resource: " + path);
+            }
+            return new String(stream.readAllBytes(), StandardCharsets.UTF_8).replace("\r\n", "\n");
+        }
+    }
+
+    private String expectedResource(final String path) throws IOException {
+        return this.resource(path).replaceAll("(?m)^\\s*// (?:TODO|@todo).*\\n?", "");
+    }
+}

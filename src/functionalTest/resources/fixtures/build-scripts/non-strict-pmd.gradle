@@ -1,6 +1,6 @@
 plugins {
     id 'java'
-    id 'org.unifycode'
+    id 'io.github.c71n93.unifycode'
 }
 
 repositories {

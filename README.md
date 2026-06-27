@@ -36,7 +36,7 @@ This plugin was inspired by [Qulice](https://www.qulice.com/).
 
 ## Usage
 
-Apply the `org.unifycode` Gradle plugin to a Java project.
+Apply the `io.github.c71n93.unifycode` Gradle plugin to a Java project.
 
 ### Gradle Setup
 
@@ -56,7 +56,7 @@ pluginManagement {
     }
     resolutionStrategy {
         eachPlugin {
-            if (requested.id.id == 'org.unifycode') {
+            if (requested.id.id == 'io.github.c71n93.unifycode') {
                 useModule("com.github.c71n93.unifycode-java:unifycode-gradle-plugin:${requested.version}")
             }
         }
@@ -69,7 +69,7 @@ Then apply the plugin in `build.gradle`:
 ```gradle
 plugins {
     id 'java'
-    id 'org.unifycode' version '<commit-or-release>'
+    id 'io.github.c71n93.unifycode' version '<commit-or-release>'
 }
 ```
 
@@ -107,14 +107,14 @@ Tool-specific Gradle tasks such as `checkstyleMain`, `pmdMain`,
 
 This repository is a single Gradle plugin project:
 
-- `src/main/java/org/unifycode/gradle`
+- `src/main/java/io/github/c71n93/unifycode/gradle`
   - Gradle plugin implementation, extension types, lifecycle task wiring, and
     resource copying
-- `src/main/resources/org/unifycode/checkstyle`
+- `src/main/resources/io/github/c71n93/unifycode/checkstyle`
   - bundled Checkstyle configuration assets
-- `src/main/resources/org/unifycode/pmd`
+- `src/main/resources/io/github/c71n93/unifycode/pmd`
   - bundled PMD ruleset assets
-- `src/main/resources/org/unifycode/spotless`
+- `src/main/resources/io/github/c71n93/unifycode/spotless`
   - bundled Spotless formatter assets
 - `src/functionalTest`
   - Gradle TestKit functional coverage

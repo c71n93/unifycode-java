@@ -1,5 +1,5 @@
 plugins {
-    id 'org.unifycode'
+    id 'io.github.c71n93.unifycode'
     id 'java'
 }
 
