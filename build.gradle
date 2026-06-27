@@ -1,5 +1,5 @@
 plugins {
-    id 'base'
+    id 'java-gradle-plugin'
     id 'com.diffplug.spotless' version '8.4.0'
     // @todo #2:20min Replace the temporary commit-pin plugin version with a proper release process.
     id 'org.unifycode' version 'e899268610' apply false
@@ -7,10 +7,43 @@ plugins {
 
 def useRemoteUnifycodePlugin = System.getenv('JITPACK') == null
 def junitVersion = '5.10.2'
-def gradleTestKitProjects = [':unifycode-spotless', ':unifycode-gradle-plugin'] as Set
+def functionalTest = sourceSets.create('functionalTest')
 
 group = 'c71n93'
 version = '0.1.0-SNAPSHOT'
+
+if (useRemoteUnifycodePlugin) {
+    pluginManager.apply('org.unifycode')
+}
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(21)
+    }
+}
+
+configurations[functionalTest.implementationConfigurationName].extendsFrom(configurations.testImplementation)
+configurations[functionalTest.runtimeOnlyConfigurationName].extendsFrom(configurations.testRuntimeOnly)
+
+dependencies {
+    implementation 'com.diffplug.spotless:spotless-plugin-gradle:8.4.0'
+
+    testImplementation platform("org.junit:junit-bom:${junitVersion}")
+    testImplementation 'org.junit.jupiter:junit-jupiter'
+    testImplementation gradleTestKit()
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
+
+gradlePlugin {
+    testSourceSets(functionalTest)
+
+    plugins {
+        unifycodeJava {
+            id = 'org.unifycode'
+            implementationClass = 'org.unifycode.gradle.UnifycodeGradlePlugin'
+        }
+    }
+}
 
 spotless {
     format('xml') {
@@ -21,33 +54,18 @@ spotless {
     }
 }
 
-subprojects {
-    group = rootProject.group
-    version = rootProject.version
+tasks.withType(Test).configureEach {
+    useJUnitPlatform()
+}
 
-    if (useRemoteUnifycodePlugin) {
-        pluginManager.apply('org.unifycode')
-    }
+tasks.register('functionalTest', Test) {
+    description = 'Runs functional tests.'
+    group = 'verification'
+    testClassesDirs = functionalTest.output.classesDirs
+    classpath = functionalTest.runtimeClasspath
+    shouldRunAfter(tasks.named('test'))
+}
 
-    plugins.withId('java-base') {
-        java {
-            toolchain {
-                languageVersion = JavaLanguageVersion.of(21)
-            }
-        }
-        tasks.withType(Test).configureEach {
-            useJUnitPlatform()
-        }
-    }
-
-    plugins.withId('java') {
-        dependencies {
-            testImplementation platform("org.junit:junit-bom:${junitVersion}")
-            testImplementation 'org.junit.jupiter:junit-jupiter'
-            testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
-            if (project.path in gradleTestKitProjects) {
-                testImplementation gradleTestKit()
-            }
-        }
-    }
+tasks.named('check') {
+    dependsOn(tasks.named('functionalTest'))
 }

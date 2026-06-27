@@ -49,7 +49,7 @@ jobs:
 
       # Do not use ./gradlew check here: check already depends on unifycodeCheck in this build.
       - name: Run tests and plugin validation
-        run: ./gradlew test :unifycode-gradle-plugin:functionalTest :unifycode-gradle-plugin:validatePlugins
+        run: ./gradlew test functionalTest validatePlugins
 
       - uses: actions/upload-artifact@v4
         if: failure()

@@ -14,11 +14,6 @@ pluginManagement {
 }
 
 rootProject.name = 'unifycode-java'
-include('unifycode-checkstyle', 'unifycode-pmd', 'unifycode-spotless', 'unifycode-gradle-plugin')
-
-project(':unifycode-checkstyle').projectDir = file('unifycode-core/checkstyle')
-project(':unifycode-pmd').projectDir = file('unifycode-core/pmd')
-project(':unifycode-spotless').projectDir = file('unifycode-core/spotless')
 
 dependencyResolutionManagement {
     repositories {

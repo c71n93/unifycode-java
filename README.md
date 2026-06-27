@@ -105,21 +105,19 @@ Tool-specific Gradle tasks such as `checkstyleMain`, `pmdMain`,
 
 ## Project Structure
 
-This repository is a Gradle multi-project build:
+This repository is a single Gradle plugin project:
 
-- `unifycode-core/checkstyle`
-  - Gradle path: `:unifycode-checkstyle`
-  - reusable Checkstyle configuration assets
-- `unifycode-core/pmd`
-  - Gradle path: `:unifycode-pmd`
-  - reusable PMD ruleset assets
-- `unifycode-core/spotless`
-  - Gradle path: `:unifycode-spotless`
-  - reusable Spotless formatter assets
-- `unifycode-gradle-plugin`
-  - Gradle path: `:unifycode-gradle-plugin`
-  - Gradle plugin implementation, extension types, lifecycle task wiring,
-    resource copying, and functional tests
+- `src/main/java/org/unifycode/gradle`
+  - Gradle plugin implementation, extension types, lifecycle task wiring, and
+    resource copying
+- `src/main/resources/org/unifycode/checkstyle`
+  - bundled Checkstyle configuration assets
+- `src/main/resources/org/unifycode/pmd`
+  - bundled PMD ruleset assets
+- `src/main/resources/org/unifycode/spotless`
+  - bundled Spotless formatter assets
+- `src/functionalTest`
+  - Gradle TestKit functional coverage
 
-Reusable tool configuration belongs in the tool-specific modules under
-`unifycode-core`. Gradle-specific behavior belongs in `unifycode-gradle-plugin`.
+Tool configuration assets are packaged with the plugin through normal
+`src/main/resources` behavior.
