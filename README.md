@@ -41,35 +41,9 @@ Apply the `io.github.c71n93.unifycode` Gradle plugin to a Java project.
 ### Gradle Setup
 
 ```gradle
-// @todo #2:20min Replace the JitPack setup guide with the release setup guide
-// once Unifycode is published to its long-term plugin repository.
-```
-
-Add JitPack plugin resolution to `settings.gradle`:
-
-```gradle
-pluginManagement {
-    repositories {
-        gradlePluginPortal()
-        mavenCentral()
-        maven { url = 'https://jitpack.io' }
-    }
-    resolutionStrategy {
-        eachPlugin {
-            if (requested.id.id == 'io.github.c71n93.unifycode') {
-                useModule("com.github.c71n93.unifycode-java:unifycode-gradle-plugin:${requested.version}")
-            }
-        }
-    }
-}
-```
-
-Then apply the plugin in `build.gradle`:
-
-```gradle
 plugins {
     id 'java'
-    id 'io.github.c71n93.unifycode' version '<commit-or-release>'
+    id 'io.github.c71n93.unifycode' version '0.1.0'
 }
 ```
 

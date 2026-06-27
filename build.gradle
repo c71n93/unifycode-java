@@ -1,5 +1,8 @@
 plugins {
     id 'java-gradle-plugin'
+    id 'com.gradle.plugin-publish' version '2.1.1'
+    // @todo #10:30min Make PMD, Spotless, and Checkstyle versions to have one source of truth.
+    //  Make single config file with version of tools we use. Use theese versions across the project.
     id 'com.diffplug.spotless' version '8.4.0'
     // @todo #2:20min Replace the temporary commit-pin plugin version with a proper release process.
     id 'org.unifycode' version 'e899268610' apply false
@@ -10,7 +13,7 @@ def junitVersion = '5.10.2'
 def functionalTest = sourceSets.create('functionalTest')
 
 group = 'io.github.c71n93'
-version = '0.1.0-SNAPSHOT'
+version = '0.1.0'
 
 if (useRemoteUnifycodePlugin) {
     pluginManager.apply('org.unifycode')
@@ -35,12 +38,22 @@ dependencies {
 }
 
 gradlePlugin {
+    website = 'https://github.com/c71n93/unifycode-java'
+    vcsUrl = 'https://github.com/c71n93/unifycode-java'
     testSourceSets(functionalTest)
 
     plugins {
         unifycodeJava {
             id = 'io.github.c71n93.unifycode'
             implementationClass = 'io.github.c71n93.unifycode.gradle.UnifycodeGradlePlugin'
+            displayName = 'Unifycode Java'
+            description = 'Java code-quality plugin for Gradle with preconfigured Checkstyle, PMD, and Spotless.'
+            tags.set(['java', 'quality', 'checkstyle', 'pmd', 'spotless'])
+            compatibility(it) {
+                features {
+                    configurationCache = false
+                }
+            }
         }
     }
 }
